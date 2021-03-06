@@ -1,9 +1,9 @@
-export default firebaseConfig = {
-  apiKey: "AIzaSyCCKZ4Y8wAR6TAFry1eTpot38UZJSUQk54",
-  authDomain: "doconnect-db240.firebaseapp.com",
-  projectId: "doconnect-db240",
-  storageBucket: "doconnect-db240.appspot.com",
-  messagingSenderId: "780196941441",
-  appId: "1:780196941441:web:3440d913e805cbd9b88780",
-  measurementId: "G-TNT4FWTDJB",
+var firebaseConfig = {
+  apiKey: "AIzaSyAcPJRATvCFeev-NP4s47aGjWCA92k9II4",
+  authDomain: "doconnect-1be5d.firebaseapp.com",
+  projectId: "doconnect-1be5d",
+  storageBucket: "doconnect-1be5d.appspot.com",
+  messagingSenderId: "889284378955",
+  appId: "1:889284378955:web:247a066084081636a1a8ce",
+  measurementId: "G-KHC415KFS5",
 };
