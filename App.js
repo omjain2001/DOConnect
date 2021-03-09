@@ -5,9 +5,8 @@ import { default as theme } from "./custom-theme.json";
 import { EvaIconsPack } from "@ui-kitten/eva-icons";
 import * as firebase from "firebase";
 import firebaseConfig from "./firebaseConfig";
+import { NavigationContainer } from '@react-navigation/native';
 
-import LoginScreen from "./app/screens/LoginScreen";
-import RegisterScreen from "./app/screens/RegisterScreen";
 import AuthNav from "./app/navigations/AuthNav";
 
 if (firebase.apps.length === 0) {
@@ -18,7 +17,9 @@ export default () => (
   <>
     <IconRegistry icons={EvaIconsPack} />
     <ApplicationProvider {...eva} theme={{ ...eva.light, ...theme }}>
-      <AuthNav />
+      <NavigationContainer>
+        <AuthNav/>
+      </NavigationContainer>
     </ApplicationProvider>
   </>
 );

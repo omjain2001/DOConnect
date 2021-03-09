@@ -71,7 +71,7 @@ function LoginScreen({ navigation }) {
                 </Button>
                 <Button
                   style={styles.btns}
-                  onPress={() => navigation.navigate("Register")}
+                  onPress={() => navigation.navigate("DoctorPatientScreen")}
                 >
                   REGISTER
                 </Button>
