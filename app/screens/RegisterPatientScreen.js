@@ -9,6 +9,7 @@ import {
 import { Button, Icon, Input } from "@ui-kitten/components";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import * as firebase from "firebase";
 
 import ErrorMsg from "../components/ErrorMsg";
 
@@ -16,10 +17,28 @@ const AlertIcon = (props) => <Icon {...props} name="alert-circle-outline" />;
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().required().label("Name"),
-  pass: Yup.string().required().min(5).label("Password"),
+  email: Yup.string().required().email().label("Email"),
+  pass1: Yup.string().required().min(5).label("Password"),
+  pass2: Yup.string().required().min(5).label("Password"),
 });
 
-function LoginScreen({ navigation }) {
+function RegisterPatientScreen(props) {
+  const onRegister = async ({ name, email, pass1 }) => {
+    try {
+      const result = await firebase
+        .auth()
+        .createUserWithEmailAndPassword(email, pass1);
+
+      await firebase.firestore.collection("users").doc(result.user.uid).set({
+        email: email,
+        pass: pass1,
+      });
+      console.log("Done");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const [secureTextEntry, setSecureTextEntry] = React.useState(true);
 
   const toggleSecureEntry = () => {
@@ -31,17 +50,21 @@ function LoginScreen({ navigation }) {
       <Icon {...props} name={secureTextEntry ? "eye-off" : "eye"} />
     </TouchableWithoutFeedback>
   );
-
   return (
     <ScrollView>
       <View style={styles.container}>
         {/* <Image
-          source={require("../asset/login.png")}
+          source={require("../asset/register.png")}
           style={{ height: 300, width: 300 }}
         /> */}
         <Formik
-          initialValues={{ name: "", pass: "" }}
-          onSubmit={(values) => console.log(values)}
+          initialValues={{
+            name: "",
+            email: "",
+            pass1: "",
+            pass2: "",
+          }}
+          onSubmit={onRegister}
           validationSchema={validationSchema}
         >
           {({ handleChange, handleSubmit, errors }) => (
@@ -55,24 +78,36 @@ function LoginScreen({ navigation }) {
                 <ErrorMsg>{errors.name}</ErrorMsg>
 
                 <Input
+                  label="Email"
+                  placeholder="Email"
+                  onChangeText={handleChange("email")}
+                />
+                <ErrorMsg>{errors.email}</ErrorMsg>
+
+                <Input
                   label="Password"
                   placeholder="Password"
                   caption="Should contain at least 5 characters"
                   accessoryRight={renderIcon}
                   captionIcon={AlertIcon}
                   secureTextEntry={secureTextEntry}
-                  onChangeText={handleChange("pass")}
+                  onChangeText={handleChange("pass1")}
                 />
-                <ErrorMsg>{errors.pass}</ErrorMsg>
+                <ErrorMsg>{errors.pass1}</ErrorMsg>
+
+                <Input
+                  label="Password"
+                  placeholder="Password"
+                  caption="Should contain at least 8 symbols"
+                  accessoryRight={renderIcon}
+                  captionIcon={AlertIcon}
+                  secureTextEntry={secureTextEntry}
+                  onChangeText={handleChange("pass2")}
+                />
+                <ErrorMsg>{errors.pass2}</ErrorMsg>
               </View>
               <View>
                 <Button style={styles.btns} onPress={handleSubmit}>
-                  LOGIN
-                </Button>
-                <Button
-                  style={styles.btns}
-                  onPress={() => navigation.navigate("DoctorPatientScreen")}
-                >
                   REGISTER
                 </Button>
               </View>
@@ -91,13 +126,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   inputFields: {
-    paddingVertical: 60,
+    paddingVertical: 10,
     width: 300,
   },
   btns: {
-    marginVertical: 5,
     width: 300,
+    marginVertical: 5,
   },
 });
 
-export default LoginScreen;
+export default RegisterPatientScreen;

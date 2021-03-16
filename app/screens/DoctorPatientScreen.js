@@ -6,8 +6,8 @@ import { Button, Icon } from "@ui-kitten/components";
 function DoctorPatientScreen({navigation}) {
     return (
         <View style={styles.container } >
-            <Button style={styles.btn} onPress={()=> navigation.navigate("Register")}>Doctor</Button>
-            <Button style={styles.btn} onPress={()=> navigation.navigate("Register")}>Patient</Button>
+            <Button style={styles.btn} onPress={()=> navigation.navigate("RegisterDoctorScreen")}>Doctor</Button>
+            <Button style={styles.btn} onPress={()=> navigation.navigate("RegisterPatientScreen")}>Patient</Button>
         </View>
     );
 }
