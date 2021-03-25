@@ -9,12 +9,21 @@ const Stack = createStackNavigator();
 const CompleteProfileNavigator = () => {
   return (
     <Stack.Navigator initialRouteName="PersonalDetails">
-      <Stack.Screen name="PersonalDetails" component={PersonalDetailsScreen} />
+      <Stack.Screen
+        name="PersonalDetails"
+        component={PersonalDetailsScreen}
+        options={{ headerTitle: "Complete Profile" }}
+      />
       <Stack.Screen
         name="QualificationDetails"
         component={QualificationScreen}
+        options={{ headerTitle: "Complete Profile" }}
       />
-      <Stack.Screen name="HospitalDetails" component={HospitalDetailsScreen} />
+      <Stack.Screen
+        name="HospitalDetails"
+        component={HospitalDetailsScreen}
+        options={{ headerTitle: "Complete Profile" }}
+      />
     </Stack.Navigator>
   );
 };

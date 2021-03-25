@@ -4,7 +4,6 @@ import { Layout, Text, Button, Divider, useTheme } from "@ui-kitten/components";
 import * as Yup from "yup";
 import Form from "../../components/forms/Form";
 import FormField from "../../components/forms/FormField";
-import { useFormikContext } from "formik";
 import SubmitForm from "../../components/forms/SubmitForm";
 
 const QualificationScreen = ({ navigation, route }) => {
@@ -18,8 +17,8 @@ const QualificationScreen = ({ navigation, route }) => {
 
   return (
     <Layout style={styles.container}>
-      <ScrollView style={{ width: "100%" }}>
-        <Layout style={styles.form}>
+      <ScrollView style={{ width: "100%", paddingHorizontal: 10 }}>
+        <>
           <Layout style={styles.category}>
             <Text category="h6">Qualification Details</Text>
             <Divider
@@ -57,16 +56,16 @@ const QualificationScreen = ({ navigation, route }) => {
               keyboardType="number-pad"
               name="experienceYears"
             />
-            <FormField label="Bio" placeholder="Bio" multiline name="bio" />
+            <FormField
+              label="Bio"
+              placeholder="Write about yourself"
+              multiline={true}
+              name="bio"
+              textStyle={{ minHeight: 100, textAlignVertical: "top" }}
+            />
             <Layout
               style={{ flexDirection: "row", justifyContent: "space-evenly" }}
             >
-              {/* <Button style={styles.btn} onPress={() => navigation.goBack()}>
-                Previous
-              </Button>
-              <Button style={styles.btn} onPress={() => handleSubmit()}>
-                Next
-              </Button> */}
               <SubmitForm
                 label="Previous"
                 btnStyle={{ width: "40%" }}
@@ -75,7 +74,7 @@ const QualificationScreen = ({ navigation, route }) => {
               <SubmitForm label="Next" btnStyle={{ width: "40%" }} />
             </Layout>
           </Form>
-        </Layout>
+        </>
       </ScrollView>
     </Layout>
   );
@@ -83,8 +82,6 @@ const QualificationScreen = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
   container: {
-    // marginTop: 20,
-    paddingHorizontal: 10,
     alignItems: "center",
     justifyContent: "center",
     flex: 1,

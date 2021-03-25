@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, ScrollView } from "react-native";
+import { StyleSheet, ScrollView, Alert } from "react-native";
 import {
   Layout,
   Text,
@@ -16,41 +16,61 @@ import moment from "moment";
 import { useFormikContext } from "formik";
 import SubmitForm from "../../components/forms/SubmitForm";
 
-const TimeCard = ({ label, value, showTimePicker }) => (
-  <Card
-    style={{ width: "45%", elevation: 8 }}
-    header={(props) => (
-      <Text
-        appearance="hint"
-        style={{
-          fontSize: 14,
-          alignSelf: "center",
-          padding: 10,
-        }}
+const SelectTime = ({ label, name }) => {
+  const [showTime, setShowTime] = useState(false);
+  const { setFieldValue, values, errors } = useFormikContext();
+  const theme = useTheme();
+
+  return (
+    <>
+      <Card
+        style={{ width: "45%", elevation: 8 }}
+        header={(props) => (
+          <Text
+            appearance="hint"
+            style={{
+              fontSize: 14,
+              alignSelf: "center",
+              padding: 10,
+            }}
+          >
+            {label}
+          </Text>
+        )}
+        footer={(props) => (
+          <Button
+            {...props}
+            style={{ width: "100%", height: 50 }}
+            onPress={() => setShowTime(true)}
+          >
+            Select Time
+          </Button>
+        )}
       >
-        {label}
-      </Text>
-    )}
-    footer={(props) => (
-      <Button
-        {...props}
-        style={{ width: "100%", height: 50 }}
-        onPress={() => showTimePicker(true)}
-      >
-        Select Time
-      </Button>
-    )}
-  >
-    <Text style={{ alignSelf: "center" }}>{moment(value).format("LT")}</Text>
-  </Card>
-);
+        <Text style={{ alignSelf: "center" }}>
+          {values[name] ? moment(values[name]).format("LT") : null}
+        </Text>
+      </Card>
+
+      {showTime && (
+        <DateTimePicker
+          style={{ backgroundColor: theme["color-primary-500"] }}
+          mode="time"
+          is24Hour={false}
+          display="default"
+          value={values[name] ? new Date(values[name]) : new Date()}
+          onChange={(value, selectedDate) => {
+            setShowTime(false);
+            setFieldValue(name, selectedDate);
+          }}
+        />
+      )}
+    </>
+  );
+};
 
 const HospitalDetailsScreen = ({ navigation, route }) => {
   const theme = useTheme();
-  const [openingTime, setOpeningTime] = useState(new Date());
-  const [closingTime, setClosingTime] = useState(new Date());
-  const [showOpeningTime, setShowOpeningTime] = useState(false);
-  const [showClosingTime, setShowClosingTime] = useState(false);
 
   const hospitalDetailsValidationSchema = Yup.object().shape({
     hospitalName: Yup.string().trim().required("Required"),
@@ -58,13 +78,13 @@ const HospitalDetailsScreen = ({ navigation, route }) => {
     phone1: Yup.string().trim().length(10),
     phone2: Yup.string().trim().length(10),
     telephone: Yup.string().trim(),
-    // openingTime: Yup.string().trim().required("Required"),
-    // closingTime: Yup.string().trim().required("Required"),
+    openingTime: Yup.object().nullable(),
+    closingTime: Yup.object().nullable(),
   });
 
   return (
     <Layout style={styles.container}>
-      <ScrollView style={{ width: "100%" }}>
+      <ScrollView style={{ width: "100%", paddingHorizontal: 10 }}>
         <>
           <Layout style={styles.category}>
             <Text category="h6">Hospital Details</Text>
@@ -83,13 +103,24 @@ const HospitalDetailsScreen = ({ navigation, route }) => {
               phone1: "",
               phone2: "",
               telephone: "",
-              // openingTime: "",
-              // closingTime: "",
+              openingTime: null,
+              closingTime: null,
             }}
             validationSchema={hospitalDetailsValidationSchema}
-            onSubmit={(values) =>
-              console.log({ ...route.params.values, ...values })
-            }
+            onSubmit={(values) => {
+              if (values.openingTime === null || values.closingTime === null) {
+                return Alert.alert(
+                  "Warning",
+                  "Please mention opening and closing time"
+                );
+              }
+              console.log({
+                ...route.params.values,
+                ...values,
+                openingTime: moment(values.openingTime).format("LT"),
+                closingTime: moment(values.closingTime).format("LT"),
+              });
+            }}
           >
             <FormField
               label="Hospital Name"
@@ -123,62 +154,12 @@ const HospitalDetailsScreen = ({ navigation, route }) => {
                 marginTop: 20,
               }}
             >
-              {/* <FormField
-                label="Opening Time"
-                placeholder="Select time"
-                name="openingTime"
-                value={openingTime.getHours() + ":" + openingTime.getMinutes()}
-                style={{ width: "45%" }}
-                onFocus={() => setShowOpeningTime(true)}
-              /> */}
-
-              <TimeCard
-                label="Opening Time"
-                value={openingTime}
-                showTimePicker={(val) => setShowOpeningTime(val)}
-              />
-
-              {showOpeningTime && (
-                <DateTimePicker
-                  mode="time"
-                  is24Hour={false}
-                  display="default"
-                  value={new Date(openingTime)}
-                  onChange={(value, selectedDate) => {
-                    setShowOpeningTime(false);
-                    setOpeningTime(selectedDate);
-                  }}
-                />
-              )}
-
-              <TimeCard
-                label="Closing Time"
-                value={closingTime}
-                showTimePicker={(val) => setShowClosingTime(val)}
-              />
-
-              {showClosingTime && (
-                <DateTimePicker
-                  mode="time"
-                  is24Hour={false}
-                  display="default"
-                  value={closingTime}
-                  onChange={(value, selectedDate) => {
-                    setShowClosingTime(false);
-                    setClosingTime(selectedDate);
-                  }}
-                />
-              )}
+              <SelectTime label="Opening Time" name="openingTime" />
+              <SelectTime label="Closing Time" name="closingTime" />
             </Layout>
             <Layout
               style={{ flexDirection: "row", justifyContent: "space-evenly" }}
             >
-              {/* <Button style={styles.btn} onPress={() => navigation.goBack()}>
-                Previous
-              </Button>
-              <Button style={styles.btn} onPress={() => handleSubmit()}>
-                Next
-              </Button> */}
               <SubmitForm
                 label="Previous"
                 btnStyle={{ width: "40%" }}
@@ -195,8 +176,6 @@ const HospitalDetailsScreen = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
   container: {
-    // marginTop: 20,
-    paddingHorizontal: 10,
     alignItems: "center",
     justifyContent: "center",
     flex: 1,

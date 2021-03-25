@@ -17,7 +17,7 @@ const SubmitForm = ({ label, btnStyle, onPress }) => {
 
 const styles = StyleSheet.create({
   btn: {
-    marginTop: 15,
+    marginVertical: 15,
   },
 });
 

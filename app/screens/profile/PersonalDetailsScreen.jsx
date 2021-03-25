@@ -36,8 +36,8 @@ const PersonalDetailsScreen = ({ navigation }) => {
 
   return (
     <Layout style={styles.container}>
-      <ScrollView style={{ width: "100%" }}>
-        <Layout style={styles.form}>
+      <ScrollView style={{ width: "100%", paddingHorizontal: 10 }}>
+        <>
           <Layout style={styles.category}>
             <Text category="h6">Personal Details</Text>
             <Divider
@@ -59,8 +59,9 @@ const PersonalDetailsScreen = ({ navigation }) => {
             }}
             validationSchema={personalDetailsValidationSchema}
             onSubmit={(values) => {
-              console.log(values);
-              navigation.navigate("QualificationDetails", { values });
+              navigation.navigate("QualificationDetails", {
+                values: { ...values, gender: gender[selectedIndex] },
+              });
             }}
           >
             <FormField
@@ -105,12 +106,9 @@ const PersonalDetailsScreen = ({ navigation }) => {
               keyboardType="number-pad"
               name="phone"
             />
-            {/* <Button style={styles.btn} onPress={() => handleSubmit()}>
-              Next
-            </Button> */}
             <SubmitForm label="Next" />
           </Form>
-        </Layout>
+        </>
       </ScrollView>
     </Layout>
   );
@@ -118,8 +116,6 @@ const PersonalDetailsScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    // marginTop: 20,
-    paddingHorizontal: 10,
     alignItems: "center",
     justifyContent: "center",
     flex: 1,
