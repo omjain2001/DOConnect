@@ -202,7 +202,11 @@ const PersonalDetailsScreen = ({ navigation }) => {
             validationSchema={personalDetailsValidationSchema}
             onSubmit={(values) => {
               navigation.navigate("QualificationDetails", {
-                values: { ...values, gender: gender[selectedIndex] },
+                values: {
+                  ...values,
+                  gender: gender[selectedIndex],
+                  profileImg: uri,
+                },
               });
             }}
           >
