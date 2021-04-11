@@ -1,15 +1,34 @@
-import { Button, Icon, Layout, Text } from "@ui-kitten/components";
+import {
+  Button,
+  Divider,
+  Icon,
+  Layout,
+  Text,
+  useTheme,
+} from "@ui-kitten/components";
 import React from "react";
 import { StyleSheet } from "react-native";
 
-const RegisterStage2Screen = () => {
+const RegisterStage2Screen = ({ navigation, route }) => {
+  const theme = useTheme();
+
   return (
     <Layout style={styles.container}>
-      <Text category="h6">Welcome to </Text>
+      <Text category="h6" style={{ marginTop: 20 }}>
+        Welcome to{" "}
+      </Text>
       <Layout style={{ alignItems: "center" }}>
-        <Text category="h5" style={{ marginTop: 20, fontWeight: "bold" }}>
+        <Text category="h5" style={{ marginTop: 50, fontWeight: "bold" }}>
           Mankind Medicare
         </Text>
+        <Divider
+          style={{
+            width: "20%",
+            height: 2,
+            backgroundColor: theme["color-primary-500"],
+            marginVertical: 10,
+          }}
+        />
         <Layout
           style={{
             flexDirection: "row",
@@ -33,54 +52,37 @@ const RegisterStage2Screen = () => {
         </Layout>
       </Layout>
 
-      <Layout
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-between",
-          marginTop: 50,
-        }}
+      <Button
+        style={styles.proceedBtn}
+        accessoryRight={() => (
+          <Icon
+            name="arrow-forward-outline"
+            style={{ height: 25, width: 25 }}
+            fill="#fff"
+          />
+        )}
+        onPress={() =>
+          navigation.navigate("DoctorRegistrationForm", {
+            ...route.params,
+            hospitalName: "Mankind Medicare",
+          })
+        }
       >
-        <Button
-          status="danger"
-          style={styles.cancelBtn}
-          accessoryRight={() => (
-            <Icon
-              name="close-outline"
-              style={{ height: 25, width: 25 }}
-              fill="#fff"
-            />
-          )}
-        >
-          Cancel
-        </Button>
-        <Button
-          style={styles.proceedBtn}
-          accessoryRight={() => (
-            <Icon
-              name="arrow-forward-outline"
-              style={{ height: 25, width: 25 }}
-              fill="#fff"
-            />
-          )}
-        >
-          Proceed
-        </Button>
-      </Layout>
+        Proceed
+      </Button>
     </Layout>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 50,
     paddingHorizontal: 20,
+    flex: 1,
   },
   proceedBtn: {
     width: "40%",
-  },
-  cancelBtn: {
-    width: "40%",
+    alignSelf: "center",
+    marginTop: 40,
   },
 });
 

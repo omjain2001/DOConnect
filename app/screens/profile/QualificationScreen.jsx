@@ -38,10 +38,7 @@ const QualificationScreen = ({ navigation, route }) => {
             }}
             validationSchema={qualificationDetailsValidationSchema}
             onSubmit={(values) => {
-              console.log({ ...route.params.values, ...values });
-              navigation.navigate("HospitalDetails", {
-                values: { ...route.params.values, ...values },
-              });
+              console.log({ ...route.params, ...values });
             }}
           >
             <FormField label="Degree" placeholder="Degree" name="degree" />
@@ -71,7 +68,7 @@ const QualificationScreen = ({ navigation, route }) => {
                 btnStyle={{ width: "40%" }}
                 onPress={() => navigation.goBack()}
               />
-              <SubmitForm label="Next" btnStyle={{ width: "40%" }} />
+              <SubmitForm label="Submit" btnStyle={{ width: "40%" }} />
             </Layout>
           </Form>
         </>
@@ -94,10 +91,10 @@ const styles = StyleSheet.create({
     marginVertical: 30,
   },
   divider: {
-    width: "60%",
+    width: "20%",
     height: 2,
     borderRadius: 10,
-    marginTop: 5,
+    marginVertical: 10,
   },
   radioContainer: {
     marginLeft: 5,

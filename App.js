@@ -16,6 +16,7 @@ import CompleteProfileNavigator from "./app/navigations/CompleteProfileNavigator
 import HospitalUIDScreen from "./app/screens/HospitalUIDScreen";
 import RegisterStage2Screen from "./app/screens/RegisterStage2Screen";
 import ViewHospitalDetails from "./app/screens/ViewHospitalDetails";
+import DoctorRegistrationNav from "./app/navigations/DoctorRegistrationNav";
 
 if (firebase.apps.length === 0) {
   firebase.initializeApp(firebaseConfig);
@@ -28,11 +29,7 @@ export default () => (
     <ApplicationProvider {...eva} theme={{ ...eva.light, ...theme }}>
       <Provider store={store}>
         <NavigationContainer>
-          {/* <HospitalUIDScreen /> */}
-          {/* <AuthNav/>
-          <CompleteProfileNavigator /> */}
-          {/* <RegisterStage2Screen /> */}
-          <ViewHospitalDetails />
+          <DoctorRegistrationNav />
         </NavigationContainer>
       </Provider>
     </ApplicationProvider>

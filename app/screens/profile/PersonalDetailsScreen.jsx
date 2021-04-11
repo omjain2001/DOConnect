@@ -28,7 +28,7 @@ import SubmitForm from "../../components/forms/SubmitForm";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import ImageView from "react-native-image-view";
 
-const PersonalDetailsScreen = ({ navigation }) => {
+const PersonalDetailsScreen = ({ navigation, route }) => {
   // Theme
   const theme = useTheme();
 
@@ -201,12 +201,11 @@ const PersonalDetailsScreen = ({ navigation }) => {
             }}
             validationSchema={personalDetailsValidationSchema}
             onSubmit={(values) => {
-              navigation.navigate("QualificationDetails", {
-                values: {
-                  ...values,
-                  gender: gender[selectedIndex],
-                  profileImg: uri,
-                },
+              navigation.navigate("DoctorRegistrationForm-2", {
+                ...values,
+                ...route.params,
+                gender: gender[selectedIndex],
+                profileImg: uri,
               });
             }}
           >
@@ -252,7 +251,16 @@ const PersonalDetailsScreen = ({ navigation }) => {
               keyboardType="number-pad"
               name="phone"
             />
-            <SubmitForm label="Next" />
+            <Layout
+              style={{ flexDirection: "row", justifyContent: "space-evenly" }}
+            >
+              <SubmitForm
+                label="Previous"
+                btnStyle={{ width: "40%" }}
+                onPress={() => navigation.goBack()}
+              />
+              <SubmitForm label="Next" btnStyle={{ width: "40%" }} />
+            </Layout>
           </Form>
         </>
       </ScrollView>
@@ -274,10 +282,9 @@ const styles = StyleSheet.create({
     marginVertical: 30,
   },
   divider: {
-    width: "60%",
+    width: "20%",
     height: 2,
-    borderRadius: 10,
-    marginTop: 5,
+    marginVertical: 10,
   },
   profileImgContainer: {
     height: 200,
