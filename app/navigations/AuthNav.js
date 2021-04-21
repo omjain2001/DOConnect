@@ -8,7 +8,7 @@ import BookAppointmentScreen from '../screens/BookAppointmentScreen';
 const Stack = createStackNavigator();
 
 const AuthNav = () => (
-  <Stack.Navigator initialRouteName="HospitalDetailsScreen">
+  <Stack.Navigator initialRouteName="BookAppointmentScreen">
     <Stack.Screen name="Login" component={LoginScreen} />
     <Stack.Screen name="RegisterDoctorScreen" component={RegisterDoctorScreen} />
     <Stack.Screen name="RegisterPatientScreen" component={RegisterPatientScreen} />

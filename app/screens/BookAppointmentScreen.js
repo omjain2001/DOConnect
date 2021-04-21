@@ -50,7 +50,6 @@ function BookAppointmentScreen(props) {
             }}
             onSubmit={onRegister}
             validationSchema={validationSchema}>
-
             {({ handleChange, handleSubmit, errors }) => (
               <>
                   <View style={styles.formContainer}>
@@ -61,28 +60,24 @@ function BookAppointmentScreen(props) {
                           onChangeText={handleChange("FirstName")}
                       />
                       <ErrorMsg>{errors.FirstName}</ErrorMsg>
-
                       <Input style={styles.inputFields}
                           label="Last Name"
                           placeholder="Enter your Last name"
                           onChangeText={handleChange("LastName")}
                       />
                       <ErrorMsg>{errors.LastName}</ErrorMsg>
-
                       <Input style={[styles.inputFields]}
                           label="Contact Number"
                           placeholder="Enter your Mobile Number"
                           onChangeText={handleChange("ContactNo")}
                       />
                       <ErrorMsg>{errors.ContactNo}</ErrorMsg>
-
                       <Input style={styles.inputFields}
                           label="Age"
                           placeholder="Enter your Age"
                           onChangeText={handleChange("Age")}
                       />
                       <ErrorMsg>{errors.Age}</ErrorMsg>
-
                       <View style={[styles.inputFields]}>
                           <Text appearance="hint" style={{fontSize:12}}>
                               Gender
@@ -97,21 +92,16 @@ function BookAppointmentScreen(props) {
                           </RadioGroup>
                       </View>
                       <ErrorMsg>{errors.Gender}</ErrorMsg>
-
                       <View style={[styles.inputFields, {marginBottom:15}]}>
-
                         <Text appearance="hint" style={{fontSize:12}}>
                           Select Appointment date
                         </Text>
-
                         <Datepicker
                           accessoryRight={CalendarIcon}
                           date={date}
                           onSelect={nextDate => setDate(nextDate)}
                         />
-
                       </View>
-
                       <Input
                           multiline={true}
                           textStyle={[styles.inputFields,{ minHeight:70, marginBottom:30, width:320 }]}
@@ -119,8 +109,6 @@ function BookAppointmentScreen(props) {
                           placeholder="Enter Symptoms you are having"
                           onChangeText={handleChange("Symptoms")}
                       />
-
-
                   </View>
                   
                   <Button
@@ -137,10 +125,10 @@ function BookAppointmentScreen(props) {
 }
 
 const styles = StyleSheet.create({
-    container: {
-      marginVertical:50,
-      marginHorizontal:20,
-    },
+  container: {
+    marginVertical:50,
+    marginHorizontal:20,
+  },
   formContainer:{
     
   },
@@ -149,11 +137,11 @@ const styles = StyleSheet.create({
     textAlign:"center",
   },
   inputFields: {
-   width:320,
+    width:320,
   },
   btns: {
     marginTop:20,
-    width:150,
+    width:320,
     alignSelf:"center",
   },
 });
