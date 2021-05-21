@@ -35,6 +35,7 @@ const styles = StyleSheet.create({
   container: {
     // paddingVertical: 60,
     // width: 100,
+    width: "100%",
     paddingHorizontal: 5,
     marginVertical: 10,
   },
