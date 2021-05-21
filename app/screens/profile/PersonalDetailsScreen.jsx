@@ -27,8 +27,9 @@ import * as ImagePicker from "expo-image-picker";
 import SubmitForm from "../../components/forms/SubmitForm";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import ImageView from "react-native-image-view";
+import { PropsService } from "@ui-kitten/components/devsupport";
 
-const PersonalDetailsScreen = ({ navigation, route }) => {
+const PersonalDetailsScreen = ({ type, navigation, route }) => {
   // Theme
   const theme = useTheme();
 
@@ -201,12 +202,16 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
             }}
             validationSchema={personalDetailsValidationSchema}
             onSubmit={(values) => {
-              navigation.navigate("DoctorRegistrationForm-2", {
-                ...values,
-                ...route.params,
-                gender: gender[selectedIndex],
-                profileImg: uri,
-              });
+              if (type === "patient") {
+                console.log(values);
+              } else {
+                navigation.navigate("DoctorRegistrationForm-2", {
+                  ...values,
+                  ...route.params,
+                  gender: gender[selectedIndex],
+                  profileImg: uri,
+                });
+              }
             }}
           >
             <FormField
@@ -254,12 +259,18 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
             <Layout
               style={{ flexDirection: "row", justifyContent: "space-evenly" }}
             >
-              <SubmitForm
-                label="Previous"
-                btnStyle={{ width: "40%" }}
-                onPress={() => navigation.goBack()}
-              />
-              <SubmitForm label="Next" btnStyle={{ width: "40%" }} />
+              {type === "patient" ? (
+                <SubmitForm label="Submit" btnStyle={{ width: "40%" }} />
+              ) : (
+                <>
+                  <SubmitForm
+                    label="Previous"
+                    btnStyle={{ width: "40%" }}
+                    onPress={() => navigation.goBack()}
+                  />
+                  <SubmitForm label="Next" btnStyle={{ width: "40%" }} />
+                </>
+              )}
             </Layout>
           </Form>
         </>

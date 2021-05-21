@@ -12,6 +12,7 @@ import store from "./store";
 import AuthNav from "./app/navigations/AuthNav";
 
 import DoctorRegistrationNav from "./app/navigations/DoctorRegistrationNav";
+import Navigation from "./app/navigations/Navigation";
 
 if (firebase.apps.length === 0) {
   firebase.initializeApp(firebaseConfig);
@@ -23,9 +24,7 @@ export default () => (
 
     <ApplicationProvider {...eva} theme={{ ...eva.light, ...theme }}>
       <Provider store={store}>
-        <NavigationContainer>
-          <DoctorRegistrationNav />
-        </NavigationContainer>
+        <Navigation />
       </Provider>
     </ApplicationProvider>
   </>
