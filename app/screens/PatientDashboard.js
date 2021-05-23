@@ -2,11 +2,19 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Button, Icon, Input, Layout, Text } from "@ui-kitten/components";
 import { ScrollView } from "react-native-gesture-handler";
+import { useEffect } from "react";
+import Carousel from '../components/Carousel/Carousel'
 
 function PatientDashboard(props) {
   const SearchIcon = (props) => {
     return <Icon {...props} name="search" />;
   };
+
+  
+
+  useEffect(() => {
+    
+  }, []);
 
   return (
     <ScrollView {...props}>
@@ -16,12 +24,12 @@ function PatientDashboard(props) {
         </Text>
         <Input placeholder="Search" accessoryLeft={SearchIcon} />
         <Layout style={styles.carousel} level="4">
-          <Text style={{ width: "100%", textAlign: "center" }}>Carousel</Text>
+          <Carousel/>
         </Layout>
         <Button style={styles.btn}>
           <Text>Book Appointment</Text>
         </Button>
-        <Button style={[styles.btn,{marginBottom:20}]}>
+        <Button style={[styles.btn, { marginBottom: 20 }]}>
           <Text>View Appointment History</Text>
         </Button>
         <Layout style={[styles.feedBack, { paddingTop: 20 }]} level="1">
@@ -51,29 +59,31 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   carousel: {
-    width: "100%",
-    alignContent: "center",
+    width: 320,
     justifyContent: "center",
+    alignContent:"center",
+    alignItems: "center",
     textAlign: "center",
     height: 200,
     marginVertical: 10,
   },
   feedBack: {
-    width: "100%",
+    width: 320,
     borderTopColor: "black",
     borderTopWidth: 2,
     height: 200,
-    justifyContent: "space-evenly",
+    justifyContent: "center",
+    alignContent:"center",
     alignItems: "center",
   },
   feedbackInput: {
-    width: "100%",
+    width: 320,
     maxHeight: 100,
     height: 50,
   },
   btn: {
     alignSelf: "center",
-    width: "100%",
+    width: 320,
     fontSize: 50,
     marginVertical: 10,
   },
