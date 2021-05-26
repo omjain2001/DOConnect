@@ -3,7 +3,7 @@ import { View, StyleSheet } from "react-native";
 import { Button, Icon, Input, Layout, Text } from "@ui-kitten/components";
 import { ScrollView } from "react-native-gesture-handler";
 import { useEffect } from "react";
-import Carousel from '../components/Carousel/Carousel'
+import NewsCarousel from '../components/Carousel/NewsCarousel'
 
 function PatientDashboard(props) {
   const SearchIcon = (props) => {
@@ -23,9 +23,9 @@ function PatientDashboard(props) {
           Dashboard
         </Text>
         <Input placeholder="Search" accessoryLeft={SearchIcon} />
-        <Layout style={styles.carousel} level="4">
-          <Carousel/>
-        </Layout>
+        <View style={styles.carousel} >
+          <NewsCarousel/>
+        </View>
         <Button style={styles.btn}>
           <Text>Book Appointment</Text>
         </Button>
@@ -59,12 +59,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   carousel: {
-    width: 320,
+    flex:1,
     justifyContent: "center",
     alignContent:"center",
     alignItems: "center",
     textAlign: "center",
-    height: 200,
     marginVertical: 10,
   },
   feedBack: {
