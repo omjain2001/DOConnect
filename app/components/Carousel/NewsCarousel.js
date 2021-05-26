@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { View, StyleSheet, Image, Linking, ActivityIndicator } from "react-native";
+import { View,  Image, Linking } from "react-native";
 import { create } from "apisauce";
-import { Text, Spinner } from "@ui-kitten/components";
+import { Text } from "@ui-kitten/components";
 import Carousel from "react-native-snap-carousel";
 
 function NewsCarousel() {
@@ -24,7 +24,7 @@ function NewsCarousel() {
       if (!result.ok) {
         console.log(result.problem);
       } else {
-        setArticles(result.data.articles.slice(5,10)) ;
+        setArticles(result.data.articles.slice(Math.floor(Math.random()*result.data.articles.length))) ;
         console.log(Articles);
       }
     }
