@@ -22,14 +22,14 @@ import {
 import * as Yup from "yup";
 import Form from "../../components/forms/Form";
 import FormField from "../../components/forms/FormField";
-import { useFormikContext } from "formik";
 import * as ImagePicker from "expo-image-picker";
 import SubmitForm from "../../components/forms/SubmitForm";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import ImageView from "react-native-image-view";
-import { PropsService } from "@ui-kitten/components/devsupport";
+import { Register } from "../../auth/auth";
+import { firestore, storage } from "../../auth/firebase";
 
-const PersonalDetailsScreen = ({ type, navigation, route }) => {
+const PersonalDetailsScreen = ({ navigation, route }) => {
   // Theme
   const theme = useTheme();
 
@@ -41,9 +41,9 @@ const PersonalDetailsScreen = ({ type, navigation, route }) => {
   const [viewImage, setViewImage] = useState(false);
 
   // Hooks
-  useEffect(() => {
-    LogBox.ignoreLogs(["Animated: `useNativeDriver`"]);
-  }, []);
+  // useEffect(() => {
+  //   LogBox.ignoreLogs(["Animated: `useNativeDriver`"]);
+  // }, []);
 
   // Get Camera Access
   const getCameraAccess = async () => {
@@ -88,6 +88,33 @@ const PersonalDetailsScreen = ({ type, navigation, route }) => {
       .length(10, "Invalid contact number!")
       .required("Required"),
   });
+
+  const handleSubmit = async (values) => {
+    if (type === "patient") {
+      await firestore
+        .collection("patients")
+        .doc(newUser.id)
+        .set(
+          {
+            ...values,
+            profileImg: uri,
+            gender: gender[selectedIndex],
+          },
+          { merge: true }
+        );
+    } else {
+      navigation.navigate("DoctorRegistrationForm-2", {
+        ...route.params,
+        profile: {
+          ...values,
+          gender: gender[selectedIndex],
+          profileImg: uri,
+        },
+      });
+    }
+  };
+
+  const { newUser, type } = route.params;
 
   return (
     <Layout style={styles.container}>
@@ -201,18 +228,7 @@ const PersonalDetailsScreen = ({ type, navigation, route }) => {
               phone: "",
             }}
             validationSchema={personalDetailsValidationSchema}
-            onSubmit={(values) => {
-              if (type === "patient") {
-                console.log(values);
-              } else {
-                navigation.navigate("DoctorRegistrationForm-2", {
-                  ...values,
-                  ...route.params,
-                  gender: gender[selectedIndex],
-                  profileImg: uri,
-                });
-              }
-            }}
+            onSubmit={handleSubmit}
           >
             <FormField
               label="First Name"

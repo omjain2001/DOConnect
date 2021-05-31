@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useReducer } from "react";
 import {
   View,
   StyleSheet,
@@ -6,36 +6,73 @@ import {
   Image,
   ScrollView,
 } from "react-native";
-import { Button, Icon, Input } from "@ui-kitten/components";
+import { Button, Icon, Input, Layout } from "@ui-kitten/components";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import * as firebase from "firebase";
+import { Register } from "../auth/auth";
+import { auth, firestore } from "../auth/firebase";
 
 import ErrorMsg from "../components/ErrorMsg";
+import FormField from "../components/forms/FormField";
+import Form from "../components/forms/Form";
+import SubmitForm from "../components/forms/SubmitForm";
 
 const AlertIcon = (props) => <Icon {...props} name="alert-circle-outline" />;
 
 const validationSchema = Yup.object().shape({
-  name: Yup.string().required().label("Name"),
+  // name: Yup.string().trim().required("*Required").label("Name"),
   email: Yup.string().required().email().label("Email"),
   pass1: Yup.string().required().min(5).label("Password"),
-  pass2: Yup.string().required().min(5).label("Password"),
+  pass2: Yup.string()
+    .required()
+    .min(5)
+    .label("Confirm Password")
+    .oneOf([Yup.ref("pass1")], "Passwords do not match"),
 });
 
-function RegisterScreen(props) {
-  const onRegister = async ({ name, email, pass1 }) => {
-    try {
-      const result = await firebase
-        .auth()
-        .createUserWithEmailAndPassword(email, pass1);
+function RegisterScreen({ navigation, route }) {
+  const { type, hospitalDetails } = route.params;
 
-      await firebase.firestore.collection("users").doc(result.user.uid).set({
-        email: email,
-        pass: pass1,
-      });
-      console.log("Done");
+  console.log(type, hospitalDetails);
+
+  const handleRegister = async ({ email, pass1 }) => {
+    try {
+      const user = await Register(email, pass1);
+
+      if (user?.user) {
+        if (type == "doctor") {
+          const newUser = await firestore
+            .collection("hospitals")
+            .doc(hospitalDetails.id)
+            .collection("doctors")
+            .add({
+              email,
+              isProfileSet: false,
+            });
+
+          if (newUser.id) {
+            navigation.navigate("DoctorRegistrationForm", {
+              ...route.params,
+              hospitalDetails,
+              newUser: { id: newUser.id },
+            });
+          }
+        } else {
+          const newUser = await firestore.collection("patients").add({
+            email,
+            isProfileSet: false,
+          });
+
+          if (newUser.id) {
+            navigation.navigate("PersonalDetailsForm", {
+              ...route.params,
+              newUser: { id: newUser.id },
+            });
+          }
+        }
+      }
     } catch (error) {
-      console.log(error);
+      console.log(error.message);
     }
   };
 
@@ -52,28 +89,49 @@ function RegisterScreen(props) {
   );
   return (
     <ScrollView>
-      <View style={styles.container}>
+      <Layout style={styles.container}>
         <Image
           source={require("../asset/register.png")}
           style={{ height: 300, width: 300 }}
         />
-        <Formik
+        {/* <Layout style={styles.container}> */}
+        <Form
           initialValues={{
-            name: "",
             email: "",
             pass1: "",
             pass2: "",
           }}
-          onSubmit={onRegister}
+          onSubmit={handleRegister}
           validationSchema={validationSchema}
         >
-          {({ handleChange, handleSubmit, errors }) => (
+          <FormField label="Email" placeholder="Email" name="email" />
+          <FormField
+            label="Password"
+            name="pass1"
+            placeholder="Password"
+            // caption="Should contain at least 5 characters"
+            accessoryRight={renderIcon}
+            captionIcon={AlertIcon}
+            secureTextEntry={secureTextEntry}
+          />
+          <FormField
+            label="Confirm Password"
+            placeholder="Confirm Password"
+            name="pass2"
+            // caption="Should contain at least 5 characters"
+            accessoryRight={renderIcon}
+            captionIcon={AlertIcon}
+            secureTextEntry={secureTextEntry}
+          />
+          <SubmitForm label="Register" />
+
+          {/* {({ handleChange, handleSubmit, errors }) => (
             <>
               <View style={styles.inputFields}>
                 <Input
                   label="Name"
                   placeholder="Name"
-                  onChangeText={handleChange("name")}
+                  onChangeText={() => handleChange("name")}
                 />
                 <ErrorMsg>{errors.name}</ErrorMsg>
 
@@ -96,8 +154,8 @@ function RegisterScreen(props) {
                 <ErrorMsg>{errors.pass1}</ErrorMsg>
 
                 <Input
-                  label="Password"
-                  placeholder="Password"
+                  label="Confirm Password"
+                  placeholder="Confirm Password"
                   caption="Should contain at least 8 symbols"
                   accessoryRight={renderIcon}
                   captionIcon={AlertIcon}
@@ -112,18 +170,20 @@ function RegisterScreen(props) {
                 </Button>
               </View>
             </>
-          )}
-        </Formik>
-      </View>
+          )} */}
+        </Form>
+        {/* </Layout> */}
+      </Layout>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 100,
+    // marginVertical: 100,
+    paddingHorizontal: 10,
     alignItems: "center",
-    justifyContent: "center",
+    // justifyContent: "center",
   },
   inputFields: {
     paddingVertical: 10,

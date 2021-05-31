@@ -5,6 +5,7 @@ import * as Yup from "yup";
 import Form from "../../components/forms/Form";
 import FormField from "../../components/forms/FormField";
 import SubmitForm from "../../components/forms/SubmitForm";
+import { firestore } from "../../auth/firebase";
 
 const QualificationScreen = ({ navigation, route }) => {
   const theme = useTheme();
@@ -14,6 +15,27 @@ const QualificationScreen = ({ navigation, route }) => {
     experienceYears: Yup.string(),
     bio: Yup.string().trim(),
   });
+
+  const handleSubmit = async (values) => {
+    try {
+      await firestore
+        .collection("hospitals")
+        .doc(hospitalDetails.id)
+        .collection("doctors")
+        .doc(newUser.id)
+        .set(
+          {
+            ...profile,
+            ...values,
+          },
+          { merge: true }
+        );
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  const { hospitalDetails, newUser, profile } = route.params;
 
   return (
     <Layout style={styles.container}>
@@ -37,9 +59,7 @@ const QualificationScreen = ({ navigation, route }) => {
               bio: "",
             }}
             validationSchema={qualificationDetailsValidationSchema}
-            onSubmit={(values) => {
-              console.log({ ...route.params, ...values });
-            }}
+            onSubmit={handleSubmit}
           >
             <FormField label="Degree" placeholder="Degree" name="degree" />
             <FormField

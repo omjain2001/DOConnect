@@ -9,8 +9,10 @@ import {
 import React from "react";
 import { StyleSheet } from "react-native";
 
-const RegisterStage2Screen = ({ navigation, route }) => {
+const verifyHospital = ({ navigation, route }) => {
   const theme = useTheme();
+
+  const { hospitalDetails } = route.params;
 
   return (
     <Layout style={styles.container}>
@@ -19,7 +21,7 @@ const RegisterStage2Screen = ({ navigation, route }) => {
       </Text>
       <Layout style={{ alignItems: "center" }}>
         <Text category="h5" style={{ marginTop: 50, fontWeight: "bold" }}>
-          Mankind Medicare
+          {hospitalDetails?.hospitalName}
         </Text>
         <Divider
           style={{
@@ -44,9 +46,7 @@ const RegisterStage2Screen = ({ navigation, route }) => {
           />
           <Layout style={{ paddingHorizontal: 10, flexGrow: 1 }}>
             <Text category="p1" appearance="hint">
-              Ganga Preet Cooperative Housing Society, Bunglow No 11 Defense
-              Officers, Seasons Rd, behind Medipoint Hospital, Oriental Gold
-              Society, Aundh, Pune, Maharashtra 411007
+              {hospitalDetails?.address}
             </Text>
           </Layout>
         </Layout>
@@ -61,12 +61,7 @@ const RegisterStage2Screen = ({ navigation, route }) => {
             fill="#fff"
           />
         )}
-        onPress={() =>
-          navigation.navigate("DoctorRegistrationForm", {
-            ...route.params,
-            hospitalName: "Mankind Medicare",
-          })
-        }
+        onPress={() => navigation.navigate("registerForm", { hospitalDetails })}
       >
         Proceed
       </Button>
@@ -86,4 +81,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RegisterStage2Screen;
+export default verifyHospital;

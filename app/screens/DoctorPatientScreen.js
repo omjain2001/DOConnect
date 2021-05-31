@@ -7,13 +7,17 @@ function DoctorPatientScreen({ navigation }) {
     <View style={styles.container}>
       <Button
         style={styles.btn}
-        onPress={() => navigation.navigate("doctorRegistration")}
+        onPress={() =>
+          navigation.navigate("doctorRegistration", { type: "doctor" })
+        }
       >
         Doctor
       </Button>
       <Button
         style={styles.btn}
-        onPress={() => navigation.navigate("patientRegistration")}
+        onPress={() =>
+          navigation.navigate("patientRegistration", { type: "patient" })
+        }
       >
         Patient
       </Button>
