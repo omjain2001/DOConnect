@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   ScrollView,
   Image,
   TouchableOpacity,
-  LogBox,
+  Alert,
 } from "react-native";
 import {
   Layout,
@@ -17,7 +17,6 @@ import {
   Icon,
   Modal,
   Card,
-  ButtonGroup,
 } from "@ui-kitten/components";
 import * as Yup from "yup";
 import Form from "../../components/forms/Form";
@@ -26,39 +25,26 @@ import * as ImagePicker from "expo-image-picker";
 import SubmitForm from "../../components/forms/SubmitForm";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import ImageView from "react-native-image-view";
-import { Register } from "../../auth/auth";
-import { firestore, storage } from "../../auth/firebase";
+import { storage } from "../../auth/firebase";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  setUser,
-  setUserState,
-  uploadAvatar,
-} from "../../redux/actions/authActions";
+import { updateUser } from "../../redux/actions/authActions";
 import { USER_TYPE } from "../../redux/constants";
+import { CustomSpinner } from "../CustomSpinner";
 
-// TODO
-// Update form data to redux
-// Fetch hospital detais
 const PersonalDetailsScreen = ({ navigation, route }) => {
   // Theme
   const theme = useTheme();
 
   // States
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const gender = ["male", "female", "other"];
   const [uri, setUri] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [viewImage, setViewImage] = useState(false);
-  const [profile, setProfile] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Redux state
   const auth = useSelector((state) => state.auth);
   const dispatch = useDispatch();
-
-  // Hooks
-  // useEffect(() => {
-  //   LogBox.ignoreLogs(["Animated: `useNativeDriver`"]);
-  // }, []);
 
   // Get Camera Access
   const getCameraAccess = async () => {
@@ -96,7 +82,6 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
       .min(18, "Age should be greater than 18")
       .required("Required")
       .nullable(true),
-    // email: Yup.string().email().trim().required("Required"),
     gender: Yup.string().trim(),
     phone: Yup.string()
       .length(10, "Invalid contact number!")
@@ -104,56 +89,59 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
   });
 
   const handleSubmit = async (values) => {
-    if (auth.userType === USER_TYPE.PATIENT) {
-      dispatch(uploadAvatar(uri))
-        .then((res) => {
-          console.log(res);
-          dispatch(
-            setUser({
-              ...auth.user,
-              profileImg: res.data,
-              isProfileSet: true,
-              ...values,
-            })
-          )
-            .then((res) => {
-              console.log(res.message);
-            })
-            .catch((e) => console.log(e.message));
-        })
-        .catch((error) => console.log(error.mesage));
-
-      // await firestore
-      //   .collection("patients")
-      //   .doc(newUser.id)
-      //   .set(
-      //     {
-      //       ...values,
-      //       profileImg: uri,
-      //       gender: gender[selectedIndex],
-      //     },
-      //     { merge: true }
-      //   );
-    } else {
-      dispatch(
-        setUserState({
-          ...auth.user,
-          uri,
-          ...values,
-        })
+    setIsLoading(true);
+    try {
+      if (auth.userType === USER_TYPE.PATIENT) {
+        let profileImgUrl = null;
+        if (uri !== null && uri !== auth.user.profileImg) {
+          try {
+            if (auth.user.profileImg !== null) {
+              const getImageRef = storage.refFromURL(auth.user.profileImg);
+              await getImageRef.delete();
+            }
+            const imageRef = storage.ref(
+              `${auth.currentUser.uid}/profile.${uri.split(".").pop()}`
+            );
+            const imageBlob = await (await fetch(uri)).blob();
+            await imageRef.put(imageBlob);
+            profileImgUrl = await imageRef.getDownloadURL();
+          } catch (error) {
+            console.log(error.message);
+          }
+        }
+        await dispatch(
+          updateUser({
+            ...auth.user,
+            profileImg: profileImgUrl?.data,
+            isProfileSet: true,
+            ...values,
+          })
+        );
+        setIsLoading(false);
+      } else {
+        setIsLoading(false);
+        navigation.navigate("DoctorRegistrationForm-2", {
+          profile: {
+            ...values,
+            gender: gender[selectedIndex],
+            profileImg: uri,
+          },
+        });
+      }
+    } catch (error) {
+      setIsLoading(false);
+      Alert.alert(
+        "Error in uploading profile",
+        "Unable to update profile. Please try after some time."
       );
-      navigation.navigate("DoctorRegistrationForm-2", {
-        profile: {
-          ...values,
-          gender: gender[selectedIndex],
-          profileImg: uri,
-        },
-      });
     }
   };
 
+  const gender = ["male", "female", "other"];
+
   return (
     <Layout style={styles.container}>
+      <CustomSpinner visible={isLoading} />
       <Modal
         visible={modalVisible}
         backdropStyle={{ backgroundColor: "grey" }}
@@ -243,7 +231,12 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
             />
             {uri ? (
               <TouchableOpacity onPress={() => setViewImage(true)}>
-                <Image source={{ uri }} style={styles.profileImg} />
+                <Image
+                  source={{
+                    uri,
+                  }}
+                  style={styles.profileImg}
+                />
               </TouchableOpacity>
             ) : (
               <Icon

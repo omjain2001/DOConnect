@@ -18,9 +18,9 @@ import Form from "../components/forms/Form";
 import SubmitForm from "../components/forms/SubmitForm";
 import firebase from "firebase";
 import { useSelector, useDispatch } from "react-redux";
-import { setUser } from "../redux/actions/authActions";
+import { setUserState } from "../redux/actions/authActions";
 import { CustomSpinner } from "./CustomSpinner";
-import { USER_TYPE } from "../redux/constants";
+import { COLLECTION, USER_TYPE } from "../redux/constants";
 
 const AlertIcon = (props) => <Icon {...props} name="alert-circle-outline" />;
 
@@ -45,11 +45,9 @@ function RegisterScreen({ navigation, route }) {
   const auth = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
-  // console.log(type, hospitalDetails);
-
   const handleRegister = async ({ email, pass1 }) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       const user = await Register(email, pass1);
 
       if (user?.user) {
@@ -57,31 +55,29 @@ function RegisterScreen({ navigation, route }) {
           const userData = {
             email,
             isProfileSet: false,
-            hospitalRef: `/hospitals/${auth.user.hospital?.id}`,
+            hospitalRef: `${auth.user.hospital?.id}`,
           };
 
-          const newUser = await firestore.collection("doctors").add(userData);
+          const newUser = await firestore
+            .collection(COLLECTION.DOCTOR)
+            .add(userData);
 
           // Adding new doctor to hospital
           await firestore
-            .collection("hospitals")
+            .collection(COLLECTION.HOSPITAL)
             .doc(auth.user?.hospital?.id)
-            .set(
-              {
-                doctorsRef: firebase.firestore.FieldValue.arrayUnion(
-                  `/doctors/${newUser.id}`
-                ),
-              },
-              { merge: true }
-            );
+            .update({
+              doctorsRef: firebase.firestore.FieldValue.arrayUnion(
+                `${newUser.id}`
+              ),
+            });
 
           if (newUser.id) {
-            dispatch(setUser({ id: newUser.id, ...newUser.get() })).then(
-              (res) => {
-                setIsLoading(false);
-                navigation.navigate("DoctorRegistrationForm");
-              }
+            dispatch(
+              setUserState({ id: newUser.id, ...(await newUser.get()).data() })
             );
+            setIsLoading(false);
+            navigation.navigate("DoctorRegistrationForm");
           }
         } else {
           const userData = {
@@ -89,17 +85,16 @@ function RegisterScreen({ navigation, route }) {
             isProfileSet: false,
           };
 
-          const newUser = await firestore.collection("patients").add(userData);
+          const newUser = await firestore
+            .collection(COLLECTION.PATIENT)
+            .add(userData);
 
           if (newUser.id) {
-            dispatch(setUser({ id: newUser.id, ...newUser.get() }))
-              .then((res) => {
-                setIsLoading(false);
-                navigation.navigate("PersonalDetailsForm");
-              })
-              .catch((e) => {
-                console.log(e.message);
-              });
+            dispatch(
+              setUserState({ id: newUser.id, ...(await newUser.get()).data() })
+            );
+            setIsLoading(false);
+            navigation.navigate("PersonalDetailsForm");
           }
         }
       }
@@ -120,7 +115,7 @@ function RegisterScreen({ navigation, route }) {
   return (
     <ScrollView>
       <Layout style={styles.container}>
-        <CustomSpinner visibel={isLoading} />
+        <CustomSpinner visible={isLoading} />
         <Image
           source={require("../asset/register.png")}
           style={{ height: 300, width: 300 }}

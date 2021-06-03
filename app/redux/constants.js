@@ -6,6 +6,7 @@ export const UPLOAD_AVATAR = "UPLOAD_AVATAR";
 export const REGISTER = "REGISTER";
 export const SET_ERROR = "SET_ERROR";
 export const SET_ISLOADING = "SET_ISLOADING";
+export const RESET_USER = "RESET_USER";
 
 // Collections
 export const COLLECTION = {

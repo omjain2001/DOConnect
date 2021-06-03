@@ -7,15 +7,12 @@ import {
   SET_ISLOADING,
   COLLECTION,
   USER_TYPE,
+  RESET_USER,
 } from "../constants";
 
 // Fetching user details and hospital details (if user is doctor)
 export const fetchUser = (email, userType) => async (dispatch) => {
   try {
-    dispatch({
-      type: SET_ISLOADING,
-      payload: true,
-    });
     const getUser = await firestore
       .collection(
         userType.toLowerCase() === USER_TYPE.DOCTOR.toLowerCase()
@@ -27,30 +24,18 @@ export const fetchUser = (email, userType) => async (dispatch) => {
 
     if (getUser.docs.length > 0) {
       const userData = getUser.docs[0].data();
-      const profileImgUrl = "";
-
-      // Already set during upload
-      // if (userData.profileImg) {
-      //   storage
-      //     .ref(userData.profileImg)
-      //     .getDownloadURL()
-      //     .then((url) => {
-      //       profileImgUrl = url;
-      //     });
-      // }
-
       dispatch({
         type: SET_USER,
         payload: {
           ...userData,
-          profileImg: profileImgUrl,
+          id: getUser.docs[0].id,
         },
       });
 
       if (userType.toLowerCase() === USER_TYPE.DOCTOR.toLowerCase()) {
         const hospitalData = await firestore
           .collection(COLLECTION.HOSPITAL)
-          .doc(getUser.docs[0].data().hospitalRef)
+          .doc(userData.hospitalRef)
           .get();
         if (hospitalData.exists) {
           dispatch({
@@ -60,11 +45,6 @@ export const fetchUser = (email, userType) => async (dispatch) => {
         }
       }
 
-      dispatch({
-        type: SET_ISLOADING,
-        payload: false,
-      });
-
       return new Promise((res) => {
         res({
           status: "success",
@@ -72,6 +52,8 @@ export const fetchUser = (email, userType) => async (dispatch) => {
           data: getUser.docs[0].data(),
         });
       });
+    } else {
+      throw new Error("Invalid user or user type");
     }
   } catch (error) {
     return new Promise((res, rej) => {
@@ -83,43 +65,14 @@ export const fetchUser = (email, userType) => async (dispatch) => {
   }
 };
 
-export const uploadAvatar = (uri) => async (dispatch) => {
-  try {
-    const imageRef = storage.ref(
-      `${auth.currentUser.uid}/profile.${uri.split(".").pop()}`
-    );
-    const imageBlob = await (await fetch(uri)).blob();
-    await imageRef.put(imageBlob);
-    const avatarUrl = await imageRef.getDownloadURL();
-    dispatch({
-      type: UPLOAD_AVATAR,
-      payload: avatarUrl,
-    });
-
-    return new Promise((res) =>
-      res({
-        status: "success",
-        message: "Avatar uploaded successfully",
-        data: avatarUrl,
-      })
-    );
-  } catch (error) {}
-};
-
 // Set or Update user in database and store
-export const setUser = (user) => async (dispatch) => {
+export const updateUser = (user) => async (dispatch, getState) => {
   try {
+    const { id, ...userData } = user;
     if (getState().auth.userType === USER_TYPE.DOCTOR) {
-      await firestore
-        .collection(COLLECTION.DOCTOR)
-        .doc(getState().auth.user.id)
-        .set(user, { merge: true });
+      await firestore.doc(`${COLLECTION.DOCTOR}/${id}`).update(userData);
     } else {
-      console.log("Setting Patient");
-      await firestore
-        .collection(COLLECTION.PATIENT)
-        .doc(getState().auth.user.id)
-        .set(user, { merge: true });
+      await firestore.doc(`${COLLECTION.PATIENT}/${id}`).update(userData);
     }
 
     dispatch({
@@ -195,10 +148,6 @@ export const fetchHospitalData = (UID) => async (dispatch) => {
         })
       );
     } else {
-      // dispatch({
-      //   type: SET_ERROR,
-      //   payload: "Hospital does not exist",
-      // });
       return new Promise((res, rej) =>
         rej({
           status: "error",
@@ -207,11 +156,6 @@ export const fetchHospitalData = (UID) => async (dispatch) => {
       );
     }
   } catch (e) {
-    // dispatch({
-    //   type: SET_ERROR,
-    //   payload: e.message,
-    // });
-
     return new Promise((res, rej) =>
       rej({
         status: "error",
@@ -219,4 +163,11 @@ export const fetchHospitalData = (UID) => async (dispatch) => {
       })
     );
   }
+};
+
+export const resetUser = () => (dispatch) => {
+  dispatch({
+    type: RESET_USER,
+    payload: null,
+  });
 };

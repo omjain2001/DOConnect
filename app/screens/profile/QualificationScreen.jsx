@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { StyleSheet, ScrollView } from "react-native";
-import { Layout, Text, Button, Divider, useTheme } from "@ui-kitten/components";
+import { Layout, Text, Divider, useTheme } from "@ui-kitten/components";
 import * as Yup from "yup";
 import Form from "../../components/forms/Form";
 import FormField from "../../components/forms/FormField";
 import SubmitForm from "../../components/forms/SubmitForm";
-import { firestore } from "../../auth/firebase";
 import { useSelector, useDispatch } from "react-redux";
-import { setUser } from "../../redux/actions/authActions";
+import { updateUser } from "../../redux/actions/authActions";
 import { CustomSpinner } from "../CustomSpinner";
 
 const QualificationScreen = ({ navigation, route }) => {
@@ -23,46 +22,42 @@ const QualificationScreen = ({ navigation, route }) => {
   const dispatch = useDispatch();
 
   const auth = useSelector((state) => state.auth);
-  console.log(auth);
 
   const handleSubmit = (values) => {
-    console.log("running");
     setIsLoading(true);
-    dispatch(
-      setUser({
-        ...auth.user,
+    const { profile } = route.params;
+    let profileImgUrl = null;
+    if (
+      profile.profileImg !== null &&
+      profile.profileImg !== auth.user.profileImg
+    ) {
+      try {
+        if (auth.user.profileImg !== null) {
+          const getImageRef = storage.refFromURL(auth.user.profileImg);
+          await getImageRef.delete();
+        }
+        const imageRef = storage.ref(
+          `${auth.currentUser.uid}/profile.${profile.profileImg
+            .split(".")
+            .pop()}`
+        );
+        const imageBlob = await(await fetch(profile.profileImg)).blob();
+        await imageRef.put(imageBlob);
+        profileImgUrl = await imageRef.getDownloadURL();
+      } catch (error) {
+        console.log(error.message);
+      }
+    }
+    await dispatch(
+      updateUser({
+        ...route.params.profile,
+        profileImg: profileImgUrl,
         ...values,
         isProfileSet: true,
       })
-    )
-      .then((res) => {
-        setIsLoading(false);
-        console.log(res.message);
-      })
-      .catch((e) => {
-        setIsLoading(false);
-        console.log(e.message);
-      });
-
-    // try {
-    //   await firestore
-    //     .collection("hospitals")
-    //     .doc(hospitalDetails.id)
-    //     .collection("doctors")
-    //     .doc(newUser.id)
-    //     .set(
-    //       {
-    //         ...profile,
-    //         ...values,
-    //       },
-    //       { merge: true }
-    //     );
-    // } catch (error) {
-    //   console.log(error.message);
-    // }
+    );
+    setIsLoading(false);
   };
-
-  console.log("In QualificationScreen");
 
   return (
     <Layout style={styles.container}>
@@ -90,7 +85,6 @@ const QualificationScreen = ({ navigation, route }) => {
             }}
             validationSchema={qualificationDetailsValidationSchema}
             onSubmit={(values) => {
-              console.log(values);
               handleSubmit(values);
             }}
           >

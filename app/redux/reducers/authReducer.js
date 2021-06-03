@@ -7,6 +7,7 @@ import {
   SET_ISLOADING,
   SET_ERROR,
   UPLOAD_AVATAR,
+  RESET_USER,
 } from "../constants";
 
 const initialState = {
@@ -53,7 +54,6 @@ export const authReducer = (state = initialState, action) => {
     }
 
     case SET_HOSPITAL_DATA: {
-      console.log(action.payload, "Hospital");
       return {
         ...state,
         isLoading: false,
@@ -77,6 +77,10 @@ export const authReducer = (state = initialState, action) => {
         ...state,
         error: action.payload,
       };
+    }
+
+    case RESET_USER: {
+      return initialState;
     }
 
     default: {

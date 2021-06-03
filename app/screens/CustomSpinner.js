@@ -18,6 +18,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   backdrop: {
-    backgroundColor: `rgba(0,0,0,0.5)`,
+    backgroundColor: "transparent",
   },
 });
