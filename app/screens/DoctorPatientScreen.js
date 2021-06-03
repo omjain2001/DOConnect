@@ -1,23 +1,29 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { Button, Icon } from "@ui-kitten/components";
+import { Button } from "@ui-kitten/components";
+import { useDispatch } from "react-redux";
+import { setUserType } from "../redux/actions/authActions";
+import { USER_TYPE } from "../redux/constants";
 
 function DoctorPatientScreen({ navigation }) {
+  const dispatch = useDispatch();
+
+  const handlePress = (routeName, type) => {
+    dispatch(setUserType(type));
+    navigation.navigate(routeName);
+  };
+
   return (
     <View style={styles.container}>
       <Button
         style={styles.btn}
-        onPress={() =>
-          navigation.navigate("doctorRegistration", { type: "doctor" })
-        }
+        onPress={() => handlePress("doctorRegistration", USER_TYPE.DOCTOR)}
       >
         Doctor
       </Button>
       <Button
         style={styles.btn}
-        onPress={() =>
-          navigation.navigate("patientRegistration", { type: "patient" })
-        }
+        onPress={() => handlePress("patientRegistration", USER_TYPE.PATIENT)}
       >
         Patient
       </Button>

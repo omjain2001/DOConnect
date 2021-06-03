@@ -28,7 +28,17 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import ImageView from "react-native-image-view";
 import { Register } from "../../auth/auth";
 import { firestore, storage } from "../../auth/firebase";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setUser,
+  setUserState,
+  uploadAvatar,
+} from "../../redux/actions/authActions";
+import { USER_TYPE } from "../../redux/constants";
 
+// TODO
+// Update form data to redux
+// Fetch hospital detais
 const PersonalDetailsScreen = ({ navigation, route }) => {
   // Theme
   const theme = useTheme();
@@ -39,6 +49,11 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
   const [uri, setUri] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [viewImage, setViewImage] = useState(false);
+  const [profile, setProfile] = useState(null);
+
+  // Redux state
+  const auth = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
   // Hooks
   // useEffect(() => {
@@ -67,7 +82,6 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
       const launchMedia = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
       });
-
       if (!launchMedia.cancelled) {
         return setUri(launchMedia.uri);
       }
@@ -82,7 +96,7 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
       .min(18, "Age should be greater than 18")
       .required("Required")
       .nullable(true),
-    email: Yup.string().email().trim().required("Required"),
+    // email: Yup.string().email().trim().required("Required"),
     gender: Yup.string().trim(),
     phone: Yup.string()
       .length(10, "Invalid contact number!")
@@ -90,21 +104,45 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
   });
 
   const handleSubmit = async (values) => {
-    if (type === "patient") {
-      await firestore
-        .collection("patients")
-        .doc(newUser.id)
-        .set(
-          {
-            ...values,
-            profileImg: uri,
-            gender: gender[selectedIndex],
-          },
-          { merge: true }
-        );
+    if (auth.userType === USER_TYPE.PATIENT) {
+      dispatch(uploadAvatar(uri))
+        .then((res) => {
+          console.log(res);
+          dispatch(
+            setUser({
+              ...auth.user,
+              profileImg: res.data,
+              isProfileSet: true,
+              ...values,
+            })
+          )
+            .then((res) => {
+              console.log(res.message);
+            })
+            .catch((e) => console.log(e.message));
+        })
+        .catch((error) => console.log(error.mesage));
+
+      // await firestore
+      //   .collection("patients")
+      //   .doc(newUser.id)
+      //   .set(
+      //     {
+      //       ...values,
+      //       profileImg: uri,
+      //       gender: gender[selectedIndex],
+      //     },
+      //     { merge: true }
+      //   );
     } else {
+      dispatch(
+        setUserState({
+          ...auth.user,
+          uri,
+          ...values,
+        })
+      );
       navigation.navigate("DoctorRegistrationForm-2", {
-        ...route.params,
         profile: {
           ...values,
           gender: gender[selectedIndex],
@@ -113,8 +151,6 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
       });
     }
   };
-
-  const { newUser, type } = route.params;
 
   return (
     <Layout style={styles.container}>
@@ -220,12 +256,14 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
 
           <Form
             initialValues={{
-              firstName: "",
-              lastName: "",
-              age: null,
-              email: "",
-              gender: gender[selectedIndex],
-              phone: "",
+              firstName: auth.user?.firstName ? auth.user.firstName : "",
+              lastName: auth.user?.lastName ? auth.user.lastName : "",
+              age: auth.user?.age ? auth.user.age : null,
+              // email: "",
+              gender: auth.user?.gender
+                ? auth.user.gender
+                : gender[selectedIndex],
+              phone: auth.user?.phone ? auth.user.phone : "",
             }}
             validationSchema={personalDetailsValidationSchema}
             onSubmit={handleSubmit}
@@ -246,12 +284,12 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
               keyboardType="number-pad"
               name="age"
             />
-            <FormField
+            {/* <FormField
               label="Email"
               placeholder="Email"
               keyboardType="email-address"
               name="email"
-            />
+            /> */}
             <Layout style={styles.radioContainer}>
               <Text appearance="hint" style={{ fontSize: 12.5 }}>
                 Gender
@@ -275,15 +313,15 @@ const PersonalDetailsScreen = ({ navigation, route }) => {
             <Layout
               style={{ flexDirection: "row", justifyContent: "space-evenly" }}
             >
-              {type === "patient" ? (
+              {auth.userType === USER_TYPE.PATIENT ? (
                 <SubmitForm label="Submit" btnStyle={{ width: "40%" }} />
               ) : (
                 <>
-                  <SubmitForm
+                  {/* <SubmitForm
                     label="Previous"
                     btnStyle={{ width: "40%" }}
-                    onPress={() => navigation.goBack()}
-                  />
+                    onPress={() => navigation.}
+                  /> */}
                   <SubmitForm label="Next" btnStyle={{ width: "40%" }} />
                 </>
               )}

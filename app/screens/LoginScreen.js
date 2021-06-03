@@ -26,6 +26,10 @@ import Form from "../components/forms/Form";
 import FormField from "../components/forms/FormField";
 import SubmitForm from "../components/forms/SubmitForm";
 import { firestore } from "../auth/firebase";
+import { USER_TYPE } from "../redux/constants";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchUser, setUserType } from "../redux/actions/authActions";
+import { CustomSpinner } from "./CustomSpinner";
 
 const AlertIcon = (props) => <Icon {...props} name="alert-circle-outline" />;
 
@@ -37,6 +41,7 @@ const validationSchema = Yup.object().shape({
 function LoginScreen({ navigation }) {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState(new IndexPath(0));
+  const [isLoading, setIsLoading] = useState(false);
 
   const toggleSecureEntry = () => {
     setSecureTextEntry(!secureTextEntry);
@@ -49,25 +54,80 @@ function LoginScreen({ navigation }) {
   );
 
   const userType = ["Doctor", "Patient"];
+  const auth = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
   const handleSubmit = async (values) => {
-    try {
-      const getUser = await firestore
-        .collection(
-          userType[selectedIndex.row] === "Doctor" ? "doctors" : "patients"
-        )
-        .where("email", "==", values.email)
-        .get();
+    setIsLoading(true);
 
-      if (getUser.docs.length > 0) {
-        const user = await Login(values.email, values.password);
-        if (user.user) {
-          console.log("User Logged in successfully");
+    const type =
+      userType[selectedIndex.row].toLowerCase() === USER_TYPE.DOCTOR
+        ? USER_TYPE.DOCTOR
+        : USER_TYPE.PATIENT;
+
+    try {
+      const user = await Login(values.email, values.password);
+      if (user.user) {
+        dispatch(setUserType(type));
+        // dispatch(fetchUser(values.email, type)).then((res) => {
+        //   setIsLoading(false);
+        //   if (!res.data.isProfileSet) {
+        //     navigation.navigate("doctorRegistration", {
+        //       screen: "DoctorRegistrationForm",
+        //     });
+        //   } else {
+        //     if (type === USER_TYPE.DOCTOR) {
+        //       console.log("Redirect to Doctor dashboard");
+        //     } else {
+        //       console.log("Redirect to Patient dashboard");
+        //     }
+        //   }
+        // });
+
+        //TODO check if we return data without
+        const res = await dispatch(fetchUser(values.email, type));
+        setIsLoading(false);
+        if (!res.data.isProfileSet) {
+          // Remaining to check for patient
+          navigation.navigate("doctorRegistration", {
+            screen: "DoctorRegistrationForm",
+          });
+        } else {
+          if (type === USER_TYPE.DOCTOR) {
+            console.log("Redirect to Doctor dashboard");
+          } else {
+            console.log("Redirect to Patient dashboard");
+          }
         }
       } else {
-        alert(`Invalid user or user type`);
+        setIsLoading(false);
+        alert("Invalid user or user type");
       }
+
+      //  // Check whether user for specified userType exists or not.
+      //   const getUser = await firestore
+      //     .collection(
+      //       userType[selectedIndex.row].toLowerCase() === USER_TYPE.DOCTOR
+      //         ? COLLECTION.DOCTOR
+      //         : COLLECTION.PATIENT
+      //     )
+      //     .where("email", "==", values.email)
+      //     .get();
+
+      //   if (getUser.docs.length > 0) {
+      //     const user = await Login(values.email, values.password);
+
+      //     if (user.user) {
+      //       await dispatch(setUser(getUser.docs[0].data()));
+      //       if (!auth.user.isProfileSet) {
+      //         navigation.navigate("DoctorRegistrationForm");
+      //       }
+      //     }
+      //   } else {
+      //     alert(`Invalid user or user type`);
+      //   }
     } catch (error) {
+      setIsLoading(false);
       const errorCode = error.code;
       if (errorCode === "auth/wrong-password") {
         alert("Wrong Password");
@@ -134,6 +194,7 @@ function LoginScreen({ navigation }) {
           source={require("../asset/login.png")}
           style={{ height: 300, width: 300 }}
         /> */}
+        <CustomSpinner visible={isLoading} />
         <Form
           initialValues={{ email: "", password: "" }}
           onSubmit={handleSubmit}

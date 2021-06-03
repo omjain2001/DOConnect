@@ -1,6 +1,7 @@
 import firebase from "firebase/app";
 import "firebase/firebase-auth";
 import "firebase/firebase-firestore";
+import "firebase/firebase-storage";
 import { firebaseConfig } from "./config.firebase";
 
 if (firebase.apps.length === 0) {

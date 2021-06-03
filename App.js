@@ -12,6 +12,7 @@ import AuthNav from "./app/navigations/AuthNav";
 import DoctorRegistrationNav from "./app/navigations/DoctorRegistrationNav";
 import Navigation from "./app/navigations/Navigation";
 import PatientDashboard from "./app/screens/PatientDashboard";
+import BookAppointmentScreen from "./app/screens/BookAppointmentScreen";
 
 export default () => (
   <>
@@ -20,7 +21,8 @@ export default () => (
     <ApplicationProvider {...eva} theme={{ ...eva.light, ...theme }}>
       <Provider store={store}>
         {/* <PatientDashboard /> */}
-        <Navigation />
+        {/* <BookAppointmentScreen /> */}
+        {/* <Navigation /> */}
       </Provider>
     </ApplicationProvider>
   </>
