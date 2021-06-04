@@ -5,13 +5,8 @@ import { useFormikContext } from "formik";
 import ErrorMsg from "../ErrorMsg";
 
 const FormField = ({ label, placeholder, name, style, ...otherProps }) => {
-  const {
-    setFieldValue,
-    errors,
-    values,
-    touched,
-    setFieldTouched,
-  } = useFormikContext();
+  const { setFieldValue, errors, values, touched, setFieldTouched } =
+    useFormikContext();
 
   return (
     <Layout style={[styles.container, style]}>

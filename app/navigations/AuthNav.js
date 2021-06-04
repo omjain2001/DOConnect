@@ -6,6 +6,7 @@ import RegisterPatientScreen from "../screens/RegisterPatientScreen";
 import RegisterDoctorScreen from "../screens/RegisterDoctorScreen";
 import DoctorRegistrationNav from "../navigations/DoctorRegistrationNav";
 import PersonalDetailsScreen from "../screens/profile/PersonalDetailsScreen";
+import PatientRegistrationNav from "./PatientRegistrationNav";
 
 const Stack = createStackNavigator();
 
@@ -20,11 +21,10 @@ const AuthNav = () => (
     />
     <Stack.Screen
       name="patientRegistration"
+      component={PatientRegistrationNav}
       // component={<PersonalDetailsScreen type="patient" />}
       options={{ headerShown: false }}
-    >
-      {() => <PersonalDetailsScreen type="patient" />}
-    </Stack.Screen>
+    />
     {/* <Stack.Screen name="RegisterDoctorScreen" component={RegisterDoctorScreen} />
     <Stack.Screen name="RegisterPatientScreen" component={RegisterPatientScreen} /> */}
   </Stack.Navigator>

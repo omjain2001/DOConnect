@@ -1,22 +1,67 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, ScrollView } from "react-native";
-import { Layout, Text, Button, Divider, useTheme } from "@ui-kitten/components";
+import { Layout, Text, Divider, useTheme } from "@ui-kitten/components";
 import * as Yup from "yup";
 import Form from "../../components/forms/Form";
 import FormField from "../../components/forms/FormField";
 import SubmitForm from "../../components/forms/SubmitForm";
+import { useSelector, useDispatch } from "react-redux";
+import { updateUser } from "../../redux/actions/authActions";
+import { CustomSpinner } from "../CustomSpinner";
 
 const QualificationScreen = ({ navigation, route }) => {
   const theme = useTheme();
   const qualificationDetailsValidationSchema = Yup.object().shape({
     degree: Yup.string().trim().required("Required"),
     specialization: Yup.string().trim(),
-    experienceYears: Yup.string(),
+    yearsOfExp: Yup.number().positive(),
     bio: Yup.string().trim(),
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
+
+  const auth = useSelector((state) => state.auth);
+
+  const handleSubmit = (values) => {
+    setIsLoading(true);
+    const { profile } = route.params;
+    let profileImgUrl = null;
+    if (
+      profile.profileImg !== null &&
+      profile.profileImg !== auth.user.profileImg
+    ) {
+      try {
+        if (auth.user.profileImg !== null) {
+          const getImageRef = storage.refFromURL(auth.user.profileImg);
+          await getImageRef.delete();
+        }
+        const imageRef = storage.ref(
+          `${auth.currentUser.uid}/profile.${profile.profileImg
+            .split(".")
+            .pop()}`
+        );
+        const imageBlob = await(await fetch(profile.profileImg)).blob();
+        await imageRef.put(imageBlob);
+        profileImgUrl = await imageRef.getDownloadURL();
+      } catch (error) {
+        console.log(error.message);
+      }
+    }
+    await dispatch(
+      updateUser({
+        ...route.params.profile,
+        profileImg: profileImgUrl,
+        ...values,
+        isProfileSet: true,
+      })
+    );
+    setIsLoading(false);
+  };
+
   return (
     <Layout style={styles.container}>
+      <CustomSpinner visible={isLoading} />
       <ScrollView style={{ width: "100%", paddingHorizontal: 10 }}>
         <>
           <Layout style={styles.category}>
@@ -31,14 +76,16 @@ const QualificationScreen = ({ navigation, route }) => {
 
           <Form
             initialValues={{
-              degree: "",
-              specialization: "",
-              experienceYears: "",
-              bio: "",
+              degree: auth.user?.degree ? auth.user.degree : "",
+              specialization: auth.user?.specialization
+                ? auth.user.specialization
+                : "",
+              yearsOfExp: auth.user?.yearsOfExp ? auth.user.yearsOfExp : 0,
+              bio: auth.user?.bio ? auth.user.bio : "",
             }}
             validationSchema={qualificationDetailsValidationSchema}
             onSubmit={(values) => {
-              console.log({ ...route.params, ...values });
+              handleSubmit(values);
             }}
           >
             <FormField label="Degree" placeholder="Degree" name="degree" />

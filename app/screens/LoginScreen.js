@@ -1,26 +1,35 @@
-import React from "react";
+import React, { useState } from "react";
+import { StyleSheet, TouchableWithoutFeedback, ScrollView } from "react-native";
 import {
-  View,
-  StyleSheet,
-  TouchableWithoutFeedback,
-  Image,
-  ScrollView,
-} from "react-native";
-import { Button, Icon, Input } from "@ui-kitten/components";
-import { Formik } from "formik";
+  Icon,
+  IndexPath,
+  Layout,
+  Select,
+  SelectItem,
+} from "@ui-kitten/components";
 import * as Yup from "yup";
 
-import ErrorMsg from "../components/ErrorMsg";
+import { Login } from "../auth/auth";
+import Form from "../components/forms/Form";
+import FormField from "../components/forms/FormField";
+import SubmitForm from "../components/forms/SubmitForm";
+import { auth } from "../auth/firebase";
+import { USER_TYPE } from "../redux/constants";
+import { useDispatch } from "react-redux";
+import { fetchUser, setUserType } from "../redux/actions/authActions";
+import { CustomSpinner } from "./CustomSpinner";
 
 const AlertIcon = (props) => <Icon {...props} name="alert-circle-outline" />;
 
 const validationSchema = Yup.object().shape({
-  name: Yup.string().required().label("Name"),
-  pass: Yup.string().required().min(5).label("Password"),
+  email: Yup.string().required("Required").label("Email"),
+  password: Yup.string().required("Required").min(5).label("Password"),
 });
 
 function LoginScreen({ navigation }) {
-  const [secureTextEntry, setSecureTextEntry] = React.useState(true);
+  const [secureTextEntry, setSecureTextEntry] = useState(true);
+  const [selectedIndex, setSelectedIndex] = useState(new IndexPath(0));
+  const [isLoading, setIsLoading] = useState(false);
 
   const toggleSecureEntry = () => {
     setSecureTextEntry(!secureTextEntry);
@@ -32,19 +41,106 @@ function LoginScreen({ navigation }) {
     </TouchableWithoutFeedback>
   );
 
+  const userType = ["Doctor", "Patient"];
+  // const auth = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+
+  const handleSubmit = async (values) => {
+    setIsLoading(true);
+    const type =
+      userType[selectedIndex.row].toLowerCase() === USER_TYPE.DOCTOR
+        ? USER_TYPE.DOCTOR
+        : USER_TYPE.PATIENT;
+
+    try {
+      const user = await Login(values.email, values.password);
+      if (user.user) {
+        dispatch(setUserType(type));
+
+        const res = await dispatch(fetchUser(values.email, type));
+        setIsLoading(false);
+
+        if (!res.data.isProfileSet) {
+          if (type === USER_TYPE.DOCTOR) {
+            navigation.navigate("doctorRegistration", {
+              screen: "DoctorRegistrationForm",
+            });
+          } else {
+            navigation.navigate("patientRegistration", {
+              screen: "PersonalDetailsForm",
+            });
+          }
+        } else {
+          if (type === USER_TYPE.DOCTOR) {
+            console.log("Redirect to Doctor dashboard");
+          } else {
+            console.log("Redirect to Patient dashboard");
+          }
+        }
+      } else {
+        setIsLoading(false);
+        await auth.signOut();
+        alert("Invalid user or user type");
+      }
+    } catch (error) {
+      setIsLoading(false);
+      const errorCode = error.code;
+      if (errorCode === "auth/wrong-password") {
+        alert("Wrong Password");
+      } else {
+        alert(error.message);
+      }
+    }
+  };
+
   return (
     <ScrollView>
-      <View style={styles.container}>
+      <Layout style={styles.container}>
         {/* <Image
           source={require("../asset/login.png")}
           style={{ height: 300, width: 300 }}
         /> */}
-        <Formik
-          initialValues={{ name: "", pass: "" }}
-          onSubmit={(values) => console.log(values)}
+        <CustomSpinner visible={isLoading} />
+        <Form
+          initialValues={{ email: "", password: "" }}
+          onSubmit={handleSubmit}
           validationSchema={validationSchema}
         >
-          {({ handleChange, handleSubmit, errors }) => (
+          <FormField name="email" label="Email" placeholder="Email" />
+          <FormField
+            name="password"
+            label="Password"
+            placeholder="Password"
+            accessoryRight={renderIcon}
+            captionIcon={AlertIcon}
+            secureTextEntry={secureTextEntry}
+          />
+          <Layout style={{ width: "100%" }}>
+            <Select
+              label="User Type"
+              value={userType[selectedIndex.row]}
+              selectedIndex={selectedIndex}
+              onSelect={(index) => setSelectedIndex(index)}
+              style={{
+                width: "100%",
+                paddingHorizontal: 5,
+                marginVertical: 10,
+              }}
+            >
+              <SelectItem title="Doctor" />
+              <SelectItem title="Patient" />
+            </Select>
+          </Layout>
+          <SubmitForm
+            label="Login"
+            btnStyle={{ width: "80%", marginTop: 20 }}
+          />
+          <SubmitForm
+            label="Register"
+            btnStyle={{ width: "80%" }}
+            onPress={() => navigation.navigate("DoctorPatientScreen")}
+          />
+          {/* {({ handleChange, handleSubmit, errors }) => (
             <>
               <View style={styles.inputFields}>
                 <Input
@@ -65,6 +161,17 @@ function LoginScreen({ navigation }) {
                 />
                 <ErrorMsg>{errors.pass}</ErrorMsg>
               </View>
+              <Layout>
+                <Select
+                  label="Type of User"
+                  value={userType[selectedIndex]}
+                  selectedIndex={selectedIndex}
+                  onSelect={(index) => setSelectedIndex(index)}
+                >
+                  <SelectItem title="Doctor" />
+                  <SelectItem title="Patient" />
+                </Select>
+              </Layout>
               <View>
                 <Button style={styles.btns} onPress={handleSubmit}>
                   LOGIN
@@ -77,9 +184,9 @@ function LoginScreen({ navigation }) {
                 </Button>
               </View>
             </>
-          )}
-        </Formik>
-      </View>
+          )} */}
+        </Form>
+      </Layout>
     </ScrollView>
   );
 }
@@ -89,6 +196,7 @@ const styles = StyleSheet.create({
     marginVertical: 100,
     alignItems: "center",
     justifyContent: "center",
+    paddingHorizontal: 10,
   },
   inputFields: {
     paddingVertical: 60,

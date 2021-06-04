@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   ScrollView,
   Image,
   TouchableOpacity,
-  LogBox,
+  Alert,
 } from "react-native";
 import {
   Layout,
@@ -17,33 +17,34 @@ import {
   Icon,
   Modal,
   Card,
-  ButtonGroup,
 } from "@ui-kitten/components";
 import * as Yup from "yup";
 import Form from "../../components/forms/Form";
 import FormField from "../../components/forms/FormField";
-import { useFormikContext } from "formik";
 import * as ImagePicker from "expo-image-picker";
 import SubmitForm from "../../components/forms/SubmitForm";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import ImageView from "react-native-image-view";
-import { PropsService } from "@ui-kitten/components/devsupport";
+import { storage } from "../../auth/firebase";
+import { useDispatch, useSelector } from "react-redux";
+import { updateUser } from "../../redux/actions/authActions";
+import { USER_TYPE } from "../../redux/constants";
+import { CustomSpinner } from "../CustomSpinner";
 
-const PersonalDetailsScreen = ({ type, navigation, route }) => {
+const PersonalDetailsScreen = ({ navigation, route }) => {
   // Theme
   const theme = useTheme();
 
   // States
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const gender = ["male", "female", "other"];
   const [uri, setUri] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [viewImage, setViewImage] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Hooks
-  useEffect(() => {
-    LogBox.ignoreLogs(["Animated: `useNativeDriver`"]);
-  }, []);
+  // Redux state
+  const auth = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
   // Get Camera Access
   const getCameraAccess = async () => {
@@ -67,7 +68,6 @@ const PersonalDetailsScreen = ({ type, navigation, route }) => {
       const launchMedia = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
       });
-
       if (!launchMedia.cancelled) {
         return setUri(launchMedia.uri);
       }
@@ -82,15 +82,66 @@ const PersonalDetailsScreen = ({ type, navigation, route }) => {
       .min(18, "Age should be greater than 18")
       .required("Required")
       .nullable(true),
-    email: Yup.string().email().trim().required("Required"),
     gender: Yup.string().trim(),
     phone: Yup.string()
       .length(10, "Invalid contact number!")
       .required("Required"),
   });
 
+  const handleSubmit = async (values) => {
+    setIsLoading(true);
+    try {
+      if (auth.userType === USER_TYPE.PATIENT) {
+        let profileImgUrl = null;
+        if (uri !== null && uri !== auth.user.profileImg) {
+          try {
+            if (auth.user.profileImg !== null) {
+              const getImageRef = storage.refFromURL(auth.user.profileImg);
+              await getImageRef.delete();
+            }
+            const imageRef = storage.ref(
+              `${auth.currentUser.uid}/profile.${uri.split(".").pop()}`
+            );
+            const imageBlob = await (await fetch(uri)).blob();
+            await imageRef.put(imageBlob);
+            profileImgUrl = await imageRef.getDownloadURL();
+          } catch (error) {
+            console.log(error.message);
+          }
+        }
+        await dispatch(
+          updateUser({
+            ...auth.user,
+            profileImg: profileImgUrl?.data,
+            isProfileSet: true,
+            ...values,
+          })
+        );
+        setIsLoading(false);
+      } else {
+        setIsLoading(false);
+        navigation.navigate("DoctorRegistrationForm-2", {
+          profile: {
+            ...values,
+            gender: gender[selectedIndex],
+            profileImg: uri,
+          },
+        });
+      }
+    } catch (error) {
+      setIsLoading(false);
+      Alert.alert(
+        "Error in uploading profile",
+        "Unable to update profile. Please try after some time."
+      );
+    }
+  };
+
+  const gender = ["male", "female", "other"];
+
   return (
     <Layout style={styles.container}>
+      <CustomSpinner visible={isLoading} />
       <Modal
         visible={modalVisible}
         backdropStyle={{ backgroundColor: "grey" }}
@@ -180,7 +231,12 @@ const PersonalDetailsScreen = ({ type, navigation, route }) => {
             />
             {uri ? (
               <TouchableOpacity onPress={() => setViewImage(true)}>
-                <Image source={{ uri }} style={styles.profileImg} />
+                <Image
+                  source={{
+                    uri,
+                  }}
+                  style={styles.profileImg}
+                />
               </TouchableOpacity>
             ) : (
               <Icon
@@ -193,26 +249,17 @@ const PersonalDetailsScreen = ({ type, navigation, route }) => {
 
           <Form
             initialValues={{
-              firstName: "",
-              lastName: "",
-              age: null,
-              email: "",
-              gender: gender[selectedIndex],
-              phone: "",
+              firstName: auth.user?.firstName ? auth.user.firstName : "",
+              lastName: auth.user?.lastName ? auth.user.lastName : "",
+              age: auth.user?.age ? auth.user.age : null,
+              // email: "",
+              gender: auth.user?.gender
+                ? auth.user.gender
+                : gender[selectedIndex],
+              phone: auth.user?.phone ? auth.user.phone : "",
             }}
             validationSchema={personalDetailsValidationSchema}
-            onSubmit={(values) => {
-              if (type === "patient") {
-                console.log(values);
-              } else {
-                navigation.navigate("DoctorRegistrationForm-2", {
-                  ...values,
-                  ...route.params,
-                  gender: gender[selectedIndex],
-                  profileImg: uri,
-                });
-              }
-            }}
+            onSubmit={handleSubmit}
           >
             <FormField
               label="First Name"
@@ -230,12 +277,12 @@ const PersonalDetailsScreen = ({ type, navigation, route }) => {
               keyboardType="number-pad"
               name="age"
             />
-            <FormField
+            {/* <FormField
               label="Email"
               placeholder="Email"
               keyboardType="email-address"
               name="email"
-            />
+            /> */}
             <Layout style={styles.radioContainer}>
               <Text appearance="hint" style={{ fontSize: 12.5 }}>
                 Gender
@@ -259,15 +306,15 @@ const PersonalDetailsScreen = ({ type, navigation, route }) => {
             <Layout
               style={{ flexDirection: "row", justifyContent: "space-evenly" }}
             >
-              {type === "patient" ? (
+              {auth.userType === USER_TYPE.PATIENT ? (
                 <SubmitForm label="Submit" btnStyle={{ width: "40%" }} />
               ) : (
                 <>
-                  <SubmitForm
+                  {/* <SubmitForm
                     label="Previous"
                     btnStyle={{ width: "40%" }}
-                    onPress={() => navigation.goBack()}
-                  />
+                    onPress={() => navigation.}
+                  /> */}
                   <SubmitForm label="Next" btnStyle={{ width: "40%" }} />
                 </>
               )}

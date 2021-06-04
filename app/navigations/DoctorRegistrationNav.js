@@ -2,16 +2,20 @@ import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Text } from "@ui-kitten/components";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useSelector } from "react-redux";
 
 // Screens
 import AuthenticateUIDScreen from "../screens/AuthenticateUIDScreen";
 import VerifyHospitalScreen from "../screens/VerifyHospitalScreen";
 import PersonalDetailsScreen from "../screens/profile/PersonalDetailsScreen";
 import QualificationScreen from "../screens/profile/QualificationScreen";
+import RegisterScreen from "../screens/RegisterScreen";
 
 const Stack = createStackNavigator();
 
 const DoctorRegistrationNav = () => {
+  const auth = useSelector((state) => state.auth);
+
   return (
     <Stack.Navigator mode="card">
       <Stack.Screen
@@ -25,12 +29,17 @@ const DoctorRegistrationNav = () => {
         options={{ headerTitle: "Verification" }}
       />
       <Stack.Screen
+        name="registerForm"
+        component={RegisterScreen}
+        options={{ headerTitle: "Register" }}
+      />
+      <Stack.Screen
         name="DoctorRegistrationForm"
         component={PersonalDetailsScreen}
         options={({ route }) => ({
           headerTitle: (props) => (
             <Text {...props} style={{ marginLeft: -30, fontWeight: "bold" }}>
-              {route.params.hospitalName}
+              {auth.user?.hospital?.hospitalName}
             </Text>
           ),
           headerLeft: (props) => (
@@ -49,7 +58,7 @@ const DoctorRegistrationNav = () => {
         options={({ route }) => ({
           headerTitle: (props) => (
             <Text {...props} style={{ marginLeft: -30, fontWeight: "bold" }}>
-              {route.params.hospitalName}
+              {auth.user?.hospital?.hospitalName}
             </Text>
           ),
           headerLeft: (props) => (

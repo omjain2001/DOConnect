@@ -8,9 +8,16 @@ import {
 } from "@ui-kitten/components";
 import React from "react";
 import { StyleSheet } from "react-native";
+import { useSelector } from "react-redux";
 
-const RegisterStage2Screen = ({ navigation, route }) => {
+const verifyHospital = ({ navigation }) => {
   const theme = useTheme();
+
+  // Redux state
+  const {
+    user: { hospital },
+  } = useSelector((state) => state.auth);
+  // const { hospitalDetails } = route.params;
 
   return (
     <Layout style={styles.container}>
@@ -19,7 +26,7 @@ const RegisterStage2Screen = ({ navigation, route }) => {
       </Text>
       <Layout style={{ alignItems: "center" }}>
         <Text category="h5" style={{ marginTop: 50, fontWeight: "bold" }}>
-          Mankind Medicare
+          {hospital?.hospitalName}
         </Text>
         <Divider
           style={{
@@ -44,9 +51,7 @@ const RegisterStage2Screen = ({ navigation, route }) => {
           />
           <Layout style={{ paddingHorizontal: 10, flexGrow: 1 }}>
             <Text category="p1" appearance="hint">
-              Ganga Preet Cooperative Housing Society, Bunglow No 11 Defense
-              Officers, Seasons Rd, behind Medipoint Hospital, Oriental Gold
-              Society, Aundh, Pune, Maharashtra 411007
+              {hospital?.address}
             </Text>
           </Layout>
         </Layout>
@@ -61,12 +66,7 @@ const RegisterStage2Screen = ({ navigation, route }) => {
             fill="#fff"
           />
         )}
-        onPress={() =>
-          navigation.navigate("DoctorRegistrationForm", {
-            ...route.params,
-            hospitalName: "Mankind Medicare",
-          })
-        }
+        onPress={() => navigation.navigate("registerForm")}
       >
         Proceed
       </Button>
@@ -86,4 +86,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RegisterStage2Screen;
+export default verifyHospital;
