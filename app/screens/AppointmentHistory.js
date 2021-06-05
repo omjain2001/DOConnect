@@ -6,6 +6,7 @@ import {
   Card,
   Divider,
   Icon,
+  Layout,
   Modal,
   Text,
 } from "@ui-kitten/components";
@@ -21,7 +22,7 @@ function AppointmentHistory(props) {
   const [visible, setvisible] = useState(false);
 
   const [activeCard, setactiveCard] = useState({
-    name: "Mayur",
+    hosp_name: "Mayur",
     issue: lorem,
     due: "12/12/2012",
     avatar: "https://image.flaticon.com/icons/png/512/3135/3135768.png",
@@ -62,7 +63,7 @@ function AppointmentHistory(props) {
 
   return (
     <ScrollView {...props}>
-      <View style={styles.container} {...props}>
+      <Layout style={styles.container} {...props}>
         <Text style={{ top: 0, textAlign: "center" }} category="h3" {...props}>
           Appointments
         </Text>
@@ -164,15 +165,15 @@ function AppointmentHistory(props) {
             <Button {...props} onPress={()=>setvisible(false)} >Close</Button>
           </Card>
         </Modal>
-      </View>
+      </Layout>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 30,
-    marginHorizontal: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     alignContent: "center",
     justifyContent: "center",
   },
