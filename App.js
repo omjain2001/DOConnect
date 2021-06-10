@@ -12,6 +12,10 @@ import AuthNav from "./app/navigations/AuthNav";
 import DoctorRegistrationNav from "./app/navigations/DoctorRegistrationNav";
 import Navigation from "./app/navigations/Navigation";
 import PatientDashboard from "./app/screens/PatientDashboard";
+import ViewHospitalDetails from './app/screens/ViewHospitalDetails'
+import DoctorDashboard from "./app/screens/DoctorDashboard";
+import BookAppointmentScreen from "./app/screens/BookAppointmentScreen";
+import AppoinmentDetails from "./app/screens/profile/AppoinmentDetails";
 
 export default () => (
   <>
@@ -20,7 +24,11 @@ export default () => (
     <ApplicationProvider {...eva} theme={{ ...eva.light, ...theme }}>
       <Provider store={store}>
         {/* <PatientDashboard /> */}
-        <Navigation />
+        {/* <Navigation /> */}
+        {/* <ViewHospitalDetails/> */}
+        {/* <DoctorDashboard/>  */}
+        {/* <BookAppointmentScreen/> */}
+        <AppoinmentDetails/>
       </Provider>
     </ApplicationProvider>
   </>
