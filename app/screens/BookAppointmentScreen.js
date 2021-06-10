@@ -1,6 +1,8 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import {
+  Button,
+  Input,
   Datepicker,
   Text,
   RadioGroup,
@@ -31,13 +33,13 @@ const validationSchema = Yup.object().shape({
     .positive()
     .integer("Please enter your Age")
     .label(),
-  Symptoms:Yup.string().required(),
+  Symptoms: Yup.string().required(),
 });
 
-function BookAppointmentScreen({navigation}) {
+function BookAppointmentScreen({ navigation }) {
   const handleSubmit = (values) => {
-    console.log("registered")
-    navigation.navigate("PatientDashboard")
+    console.log("registered");
+    navigation.navigate("PatientDashboard");
   };
 
   const [selectedIndex, setSelectedIndex] = React.useState(0);
@@ -51,7 +53,7 @@ function BookAppointmentScreen({navigation}) {
   return (
     <ScrollView>
       <Layout style={styles.container}>
-        <Text  category="h3" style={{textAlign:"center"}} >
+        <Text category="h3" style={{ textAlign: "center" }}>
           Book Appointment
         </Text>
         <Form
@@ -84,29 +86,29 @@ function BookAppointmentScreen({navigation}) {
           />
           <FormField label="Age" name="Age" placeholder="Enter your Age" />
           <Layout style={styles.fields}>
-          <Text appearance="hint" style={{ fontSize: 12 }}>
-            Gender
-          </Text>
-          <RadioGroup
-            style={{ flex: 9, flexDirection: "row" }}
-            selectedIndex={selectedIndex}
-            name="gender"
-            onChange={(index) => setSelectedIndex(index)}
-          >
-            <Radio style={{ flex: 3 }}>Female</Radio>
-            <Radio style={{ flex: 3 }}>Male</Radio>
-            <Radio style={{ flex: 3 }}>Other</Radio>
-          </RadioGroup>
+            <Text appearance="hint" style={{ fontSize: 12 }}>
+              Gender
+            </Text>
+            <RadioGroup
+              style={{ flex: 9, flexDirection: "row" }}
+              selectedIndex={selectedIndex}
+              name="gender"
+              onChange={(index) => setSelectedIndex(index)}
+            >
+              <Radio style={{ flex: 3 }}>Female</Radio>
+              <Radio style={{ flex: 3 }}>Male</Radio>
+              <Radio style={{ flex: 3 }}>Other</Radio>
+            </RadioGroup>
           </Layout>
           <Layout style={styles.fields}>
-          <Text appearance="hint" style={{ fontSize: 12 }}>
-            Select Appointment date
-          </Text>
-          <Datepicker
-            accessoryRight={CalendarIcon}
-            date={date}
-            onSelect={(nextDate) => setDate(nextDate)}
-          />
+            <Text appearance="hint" style={{ fontSize: 12 }}>
+              Select Appointment date
+            </Text>
+            <Datepicker
+              accessoryRight={CalendarIcon}
+              date={date}
+              onSelect={(nextDate) => setDate(nextDate)}
+            />
           </Layout>
           <FormField
             multiline={true}

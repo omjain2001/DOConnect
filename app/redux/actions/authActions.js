@@ -1,3 +1,4 @@
+import firebase from "firebase";
 import { auth, firestore, storage } from "../../auth/firebase";
 import {
   SET_USER,
@@ -170,4 +171,25 @@ export const resetUser = () => (dispatch) => {
     type: RESET_USER,
     payload: null,
   });
+};
+
+export const deleteUser = () => (dispatch, getState) => {
+  const userId = getState().auth.user.id;
+  try {
+    auth.currentUser.delete();
+
+    if (getState().auth.userType === USER_TYPE.PATIENT) {
+      await firestore.collection(COLLECTION.PATIENT).doc(userId).delete();
+    } else {
+      await firestore.collection(COLLECTION.DOCTOR).doc(userId).delete();
+      await firestore
+        .collection(COLLECTION.HOSPITAL)
+        .doc(`${getState().auth.user.hospital.id}.doctorsRef`)
+        .update({
+          doctorsRef: firebase.firestore.FieldValue.arrayRemove(userId),
+        });
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
 };
