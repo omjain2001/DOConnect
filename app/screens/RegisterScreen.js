@@ -1,4 +1,4 @@
-import React, { useReducer } from "react";
+import React, { useReducer, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -16,6 +16,11 @@ import ErrorMsg from "../components/ErrorMsg";
 import FormField from "../components/forms/FormField";
 import Form from "../components/forms/Form";
 import SubmitForm from "../components/forms/SubmitForm";
+import firebase from "firebase";
+import { useSelector, useDispatch } from "react-redux";
+import { setUserState } from "../redux/actions/authActions";
+import { CustomSpinner } from "./CustomSpinner";
+import { COLLECTION, USER_TYPE } from "../redux/constants";
 
 const AlertIcon = (props) => <Icon {...props} name="alert-circle-outline" />;
 
@@ -31,52 +36,72 @@ const validationSchema = Yup.object().shape({
 });
 
 function RegisterScreen({ navigation, route }) {
-  const { type, hospitalDetails } = route.params;
+  // const { type, hospitalDetails } = route.params;
 
-  console.log(type, hospitalDetails);
+  const [secureTextEntry, setSecureTextEntry] = React.useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Redux state
+  const auth = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
   const handleRegister = async ({ email, pass1 }) => {
+    setIsLoading(true);
     try {
       const user = await Register(email, pass1);
 
       if (user?.user) {
-        if (type == "doctor") {
-          const newUser = await firestore
-            .collection("hospitals")
-            .doc(hospitalDetails.id)
-            .collection("doctors")
-            .add({
-              email,
-              isProfileSet: false,
-            });
-
-          if (newUser.id) {
-            navigation.navigate("DoctorRegistrationForm", {
-              ...route.params,
-              hospitalDetails,
-              newUser: { id: newUser.id },
-            });
-          }
-        } else {
-          const newUser = await firestore.collection("patients").add({
+        if (auth.userType == USER_TYPE.DOCTOR) {
+          const userData = {
             email,
             isProfileSet: false,
-          });
+            hospitalRef: `${auth.user.hospital?.id}`,
+          };
+
+          const newUser = await firestore
+            .collection(COLLECTION.DOCTOR)
+            .add(userData);
+
+          // Adding new doctor to hospital
+          await firestore
+            .collection(COLLECTION.HOSPITAL)
+            .doc(auth.user?.hospital?.id)
+            .update({
+              doctorsRef: firebase.firestore.FieldValue.arrayUnion(
+                `${newUser.id}`
+              ),
+            });
 
           if (newUser.id) {
-            navigation.navigate("PersonalDetailsForm", {
-              ...route.params,
-              newUser: { id: newUser.id },
-            });
+            dispatch(
+              setUserState({ id: newUser.id, ...(await newUser.get()).data() })
+            );
+            setIsLoading(false);
+            navigation.navigate("DoctorRegistrationForm");
+          }
+        } else {
+          const userData = {
+            email,
+            isProfileSet: false,
+          };
+
+          const newUser = await firestore
+            .collection(COLLECTION.PATIENT)
+            .add(userData);
+
+          if (newUser.id) {
+            dispatch(
+              setUserState({ id: newUser.id, ...(await newUser.get()).data() })
+            );
+            setIsLoading(false);
+            navigation.navigate("PersonalDetailsForm");
           }
         }
       }
     } catch (error) {
-      console.log(error.message);
+      alert(error.message);
     }
   };
-
-  const [secureTextEntry, setSecureTextEntry] = React.useState(true);
 
   const toggleSecureEntry = () => {
     setSecureTextEntry(!secureTextEntry);
@@ -90,6 +115,7 @@ function RegisterScreen({ navigation, route }) {
   return (
     <ScrollView>
       <Layout style={styles.container}>
+        <CustomSpinner visible={isLoading} />
         <Image
           source={require("../asset/register.png")}
           style={{ height: 300, width: 300 }}

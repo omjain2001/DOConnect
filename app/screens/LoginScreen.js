@@ -1,31 +1,24 @@
 import React, { useState } from "react";
+import { StyleSheet, TouchableWithoutFeedback, ScrollView } from "react-native";
 import {
-  View,
-  StyleSheet,
-  TouchableWithoutFeedback,
-  Image,
-  ScrollView,
-} from "react-native";
-import {
-  Button,
   Icon,
   IndexPath,
-  Input,
   Layout,
-  Radio,
-  RadioGroup,
   Select,
   SelectItem,
 } from "@ui-kitten/components";
-import { Formik } from "formik";
 import * as Yup from "yup";
 
-import ErrorMsg from "../components/ErrorMsg";
 import { Login } from "../auth/auth";
 import Form from "../components/forms/Form";
 import FormField from "../components/forms/FormField";
 import SubmitForm from "../components/forms/SubmitForm";
-import { firestore } from "../auth/firebase";
+import { auth } from "../auth/firebase";
+import { USER_TYPE } from "../redux/constants";
+import { useDispatch } from "react-redux";
+import { fetchUser, setUserType } from "../redux/actions/authActions";
+import { CustomSpinner } from "./CustomSpinner";
+import { fetchAppointments } from "../redux/actions/appointmentActions";
 
 const AlertIcon = (props) => <Icon {...props} name="alert-circle-outline" />;
 
@@ -37,6 +30,7 @@ const validationSchema = Yup.object().shape({
 function LoginScreen({ navigation }) {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState(new IndexPath(0));
+  const [isLoading, setIsLoading] = useState(false);
 
   const toggleSecureEntry = () => {
     setSecureTextEntry(!secureTextEntry);
@@ -49,25 +43,48 @@ function LoginScreen({ navigation }) {
   );
 
   const userType = ["Doctor", "Patient"];
+  // const auth = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
   const handleSubmit = async (values) => {
-    try {
-      const getUser = await firestore
-        .collection(
-          userType[selectedIndex.row] === "Doctor" ? "doctors" : "patients"
-        )
-        .where("email", "==", values.email)
-        .get();
+    setIsLoading(true);
+    const type =
+      userType[selectedIndex.row].toLowerCase() === USER_TYPE.DOCTOR
+        ? USER_TYPE.DOCTOR
+        : USER_TYPE.PATIENT;
 
-      if (getUser.docs.length > 0) {
-        const user = await Login(values.email, values.password);
-        if (user.user) {
-          console.log("User Logged in successfully");
+    try {
+      const user = await Login(values.email, values.password);
+      if (user.user) {
+        dispatch(setUserType(type));
+        const res = await dispatch(fetchUser(values.email, type));
+        dispatch(fetchAppointments(res.data.id));
+        setIsLoading(false);
+
+        if (!res.data.isProfileSet) {
+          if (type === USER_TYPE.DOCTOR) {
+            navigation.navigate("doctorRegistration", {
+              screen: "DoctorRegistrationForm",
+            });
+          } else {
+            navigation.navigate("patientRegistration", {
+              screen: "PersonalDetailsForm",
+            });
+          }
+        } else {
+          if (type === USER_TYPE.DOCTOR) {
+            console.log("Redirect to Doctor dashboard");
+          } else {
+            console.log("Redirect to Patient dashboard");
+          }
         }
       } else {
-        alert(`Invalid user or user type`);
+        setIsLoading(false);
+        await auth.signOut();
+        alert("Invalid user or user type");
       }
     } catch (error) {
+      setIsLoading(false);
       const errorCode = error.code;
       if (errorCode === "auth/wrong-password") {
         alert("Wrong Password");
@@ -75,56 +92,6 @@ function LoginScreen({ navigation }) {
         alert(error.message);
       }
     }
-
-    // if (userType[selectedIndex.row] === "Doctor") {
-    //   const getUser = await firestore
-    //     .collection("doctors")
-    //     .where("email", "==", values.email)
-    //     .get();
-
-    //     if(getUser.docs().length > 0){
-    //       const user = await Login(values.email, values.password);
-    //       if(user.user){
-    //         console.log("User Logged in successfully");
-    //         console.log(auth.currentUser);
-    //       }
-    //     }
-    //     else {
-    //       alert("User is not a doctor");
-    //     }
-    // }
-    // else {
-    //   const getUser = await firestore
-    //   .collection("patients")
-    //   .where("email", "==", values.email)
-    //   .get();
-
-    //   if(getUser.docs().length > 0){
-    //     const user = await Login(values.email, values.password);
-    //     if(user.user){
-    //       console.log("User Logged in successfully");
-    //       console.log(auth.currentUser);
-    //     }
-    //   }
-    //   else {
-    //     alert("User is not a patient");
-    //   }
-    // }
-
-    /**
-     * TODO
-     * 1. If the user type is doctor, then he should be directed to Doctor Dashboard
-     * 2. If the user type is patient, then he should be directed to Patient Dashboard
-     * 3. If user is a patient and selects doctor, throw error
-     * 4. If user is a doctor and selects patient, throw error
-     */
-    // if (user.user) {
-    //   if (userType[selectedIndex] == "patient") {
-    //     console.log("Should navigate to Patient Dashboard");
-    //   } else {
-    //     console.log("Should navigate to Patient Dashboard");
-    //   }
-    // }
   };
 
   return (
@@ -134,6 +101,7 @@ function LoginScreen({ navigation }) {
           source={require("../asset/login.png")}
           style={{ height: 300, width: 300 }}
         /> */}
+        <CustomSpinner visible={isLoading} />
         <Form
           initialValues={{ email: "", password: "" }}
           onSubmit={handleSubmit}

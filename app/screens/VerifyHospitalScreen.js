@@ -8,11 +8,16 @@ import {
 } from "@ui-kitten/components";
 import React from "react";
 import { StyleSheet } from "react-native";
+import { useSelector } from "react-redux";
 
-const verifyHospital = ({ navigation, route }) => {
+const verifyHospital = ({ navigation }) => {
   const theme = useTheme();
 
-  const { hospitalDetails } = route.params;
+  // Redux state
+  const {
+    user: { hospital },
+  } = useSelector((state) => state.auth);
+  // const { hospitalDetails } = route.params;
 
   return (
     <Layout style={styles.container}>
@@ -21,7 +26,7 @@ const verifyHospital = ({ navigation, route }) => {
       </Text>
       <Layout style={{ alignItems: "center" }}>
         <Text category="h5" style={{ marginTop: 50, fontWeight: "bold" }}>
-          {hospitalDetails?.hospitalName}
+          {hospital?.hospitalName}
         </Text>
         <Divider
           style={{
@@ -46,7 +51,7 @@ const verifyHospital = ({ navigation, route }) => {
           />
           <Layout style={{ paddingHorizontal: 10, flexGrow: 1 }}>
             <Text category="p1" appearance="hint">
-              {hospitalDetails?.address}
+              {hospital?.address}
             </Text>
           </Layout>
         </Layout>
@@ -61,7 +66,7 @@ const verifyHospital = ({ navigation, route }) => {
             fill="#fff"
           />
         )}
-        onPress={() => navigation.navigate("registerForm", { hospitalDetails })}
+        onPress={() => navigation.navigate("registerForm")}
       >
         Proceed
       </Button>
