@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import NewsCarousel from "../components/Carousel/NewsCarousel";
 
 function PatientDashboard(props) {
+
   const SearchIcon = (props) => {
     return <Icon {...props} name="search" />;
   };
@@ -20,8 +21,10 @@ function PatientDashboard(props) {
         <Button
           style={{
             textAlign: "left",
+            width:"90%",
             alignContent: "flex-start",
             justifyContent: "flex-start",
+            alignSelf:"center",
           }}
           size="small"
           accessoryLeft={SearchIcon}
@@ -62,7 +65,6 @@ function PatientDashboard(props) {
 const styles = StyleSheet.create({
   container: {
     paddingVertical: 10,
-    paddingHorizontal: 20,
     alignContent: "center",
     justifyContent: "center",
     flex:1,
@@ -73,29 +75,17 @@ const styles = StyleSheet.create({
   },
   carousel: {
     flex: 1,
+    width:"100%",
     justifyContent: "center",
     alignContent: "center",
     alignItems: "center",
     textAlign: "center",
     marginVertical: 10,
   },
-  feedBack: {
-    width: 320,
-    borderTopColor: "black",
-    borderTopWidth: 2,
-    height: 200,
-    justifyContent: "center",
-    alignContent: "center",
-    alignItems: "center",
-  },
-  feedbackInput: {
-    width: 320,
-    maxHeight: 100,
-    height: 50,
-  },
   btn: {
+    flex:1,
+    width:"90%",
     alignSelf: "center",
-    width: 320,
     fontSize: 50,
     marginVertical: 10,
   },

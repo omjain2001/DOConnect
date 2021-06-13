@@ -1,5 +1,6 @@
 import {
   Button,
+  Divider,
   Icon,
   Input,
   Layout,
@@ -9,8 +10,7 @@ import {
 } from "@ui-kitten/components";
 import { create } from "apisauce";
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
+import { StyleSheet } from "react-native";
 
 function SearchScreen(props) {
     const [Data, setData] = useState([]); 
@@ -40,15 +40,14 @@ function SearchScreen(props) {
     return <Icon {...props} name="search" />;
   };
 
-  const renderItemAccessory = (props) => <Button size="tiny">VISIT</Button>;
+  const renderItemAccessory = (props) => <Button size="small">VISIT</Button>;
 
   const renderItemIcon = (props) => <Icon {...props} name="person" />;
 
   const renderItem = ({ item, index }) => (
     <ListItem
-      title={`${item.name} ${index + 1}`}
-      description={`${item.street_address} ${index + 1}`}
-      accessoryLeft={renderItemIcon}
+      title={<Text category="h6">{item.name}</Text>}
+      description={<Text appearance="hint" category="p1">{item.street_address}</Text>}
       accessoryRight={renderItemAccessory}
     />
   );
@@ -74,7 +73,10 @@ function SearchScreen(props) {
         ></Input>
         </Layout>
         <Layout style={{flex:10}}>
-          <List data={Hospitals} renderItem={renderItem} />
+          <List 
+            data={Hospitals}
+            ItemSeparatorComponent={Divider}  
+            showsVerticalScrollIndicator={false} renderItem={renderItem} />
         </Layout>
     </Layout>
   );
