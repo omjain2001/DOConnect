@@ -1,22 +1,22 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { View,  Image, Linking } from "react-native";
+import { View, Image, Linking } from "react-native";
 import { create } from "apisauce";
 import { Text } from "@ui-kitten/components";
 import Carousel from "react-native-snap-carousel";
-import { Dimensions } from 'react-native';
+import { Dimensions } from "react-native";
 
 function NewsCarousel() {
   const [Articles, setArticles] = useState([
     {
-      urlToImage:"https://picsum.photos/id/237/200/300",
-      url:"",
-      title:"OOPs bad network",
-    }
+      urlToImage: "https://picsum.photos/id/237/200/300",
+      url: "",
+      title: "OOPs bad network",
+    },
   ]);
 
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const windowWidth = Dimensions.get('window').width;
+  const windowWidth = Dimensions.get("window").width;
 
   useEffect(() => {
     const api = create({ baseURL: "https://newsapi.org/v2" });
@@ -28,8 +28,11 @@ function NewsCarousel() {
       if (!result.ok) {
         console.log(result.problem);
       } else {
-        setArticles(result.data.articles.slice(Math.floor(Math.random()*result.data.articles.length))) ;
-        console.log(Articles);
+        setArticles(
+          result.data.articles.slice(
+            Math.floor(Math.random() * result.data.articles.length)
+          )
+        );
       }
     }
     fetchData().catch((error) => {
@@ -43,13 +46,13 @@ function NewsCarousel() {
     return (
       <View
         style={{
-          flex:1,
-          backgroundColor:"#f2f2f2",
+          flex: 1,
+          backgroundColor: "#f2f2f2",
           justifyContent: "center",
           alignContent: "center",
           alignItems: "center",
           textAlign: "center",
-          height: 250,
+          height: 300,
         }}
       >
         <Image
@@ -59,7 +62,9 @@ function NewsCarousel() {
           }}
           source={{ uri: item.urlToImage }}
         ></Image>
-        <Text numberOfLines={2} style={{ fontSize: 15 ,flex:1, padding:5 }}>{item.title}</Text>
+        <Text numberOfLines={2} style={{ fontSize: 15, flex: 1, padding: 5 }}>
+          {item.title}
+        </Text>
       </View>
     );
   }, []);

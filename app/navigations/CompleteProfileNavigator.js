@@ -19,11 +19,6 @@ const CompleteProfileNavigator = () => {
         component={QualificationScreen}
         options={{ headerTitle: "Complete Profile" }}
       />
-      <Stack.Screen
-        name="HospitalDetails"
-        component={HospitalDetailsScreen}
-        options={{ headerTitle: "Complete Profile" }}
-      />
     </Stack.Navigator>
   );
 };

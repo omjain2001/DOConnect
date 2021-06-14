@@ -11,13 +11,13 @@ function PatientDashboard(props) {
     return <Icon {...props} name="search" />;
   };
 
-  useEffect(() => {
-    return () => {};
-  }, []);
+  // useEffect(() => {
+  //   return () => {};
+  // }, []);
 
   return (
-      <Layout style={styles.container} {...props}>
-    <ScrollView {...props}>
+    <Layout style={styles.container} {...props}>
+      <ScrollView {...props}>
         <Button
           style={{
             textAlign: "left",
@@ -29,7 +29,7 @@ function PatientDashboard(props) {
           size="small"
           accessoryLeft={SearchIcon}
           appearance="outline"
-          onPress={()=>props.navigation.navigate("Search")}
+          onPress={() => props.navigation.navigate("Search")}
         >
           <Text>Search</Text>
         </Button>
@@ -57,8 +57,8 @@ function PatientDashboard(props) {
         >
           <Text>View Profile</Text>
         </Button>
-    </ScrollView>
-      </Layout>
+      </ScrollView>
+    </Layout>
   );
 }
 
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     alignContent: "center",
     justifyContent: "center",
-    flex:1,
+    flex: 1,
   },
   heading: {
     marginVertical: 10,
@@ -81,6 +81,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     textAlign: "center",
     marginVertical: 10,
+    width: "100%",
+    paddingHorizontal: 0,
   },
   btn: {
     flex:1,

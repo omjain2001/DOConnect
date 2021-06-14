@@ -1,77 +1,75 @@
-import React from "react";
-import {  StyleSheet, Image } from "react-native";
-import {  Layout, Text, Card } from "@ui-kitten/components";
+import React, { useEffect } from "react";
+import { View, StyleSheet, Image } from "react-native";
+import {
+  Avatar,
+  Button,
+  Card,
+  Divider,
+  Icon,
+  Layout,
+  Modal,
+  Text,
+} from "@ui-kitten/components";
 import { ScrollView } from "react-native-gesture-handler";
 import { useState } from "react";
-import MyCard from "../components/MyCard";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAppointments } from "../redux/actions/appointmentActions";
 
-//Custom Hook
-const useAppointmentStatus = (status) => {
+function AppointmentHistory(props) {
   const lorem =
     "Lorem ipsum dolor sit amet consectetur adipisicing elit. Ullam eos dignissimos nesciunt aliquam laborum minima illum quo culpa? Doloremque possimus eveniet quos ut voluptates corporis minus atque aut. Non, reprehenderit.";
 
-  const [appointments, setappointments] = useState([
-    {
-      name: "HealthLine Clinic",
-      issue: lorem,
-      id:"1",
-      status: "pending",
-      due: "12/12/2012",
-      telephone: "123456789",
-    },
-    {
-      name: "HealthLine Clinic",
-      issue: lorem,
-      id:"2",
-      status: "completed",
-      due: "12/12/2012",
-      telephone: "123456789",
-    },
-    {
-      name: "HealthLine Clinic",
-      issue: lorem,
-      id:"3",
-      status: "pending",
-      due: "12/12/2012",
-      telephone: "123456789",
-    },
-    {
-      name: "HealthLine Clinic",
-      issue: lorem,
-      id:"4",
-      status: "completed",
-      due: "12/12/2012",
-      telephone: "123456789",
-    },
-    {
-      name: "HealthLine Clinic",
-      issue: lorem,
-      id:"5",
-      status: "pending",
-      due: "12/12/2012",
-      telephone: "123456789",
-    },
-    {
-      name: "HealthLine Clinic",
-      issue: lorem,
-      id:"6",
-      status: "completed",
-      due: "12/12/2012",
-      telephone: "123456789",
-    },
-    {
-      name: "HealthLine Clinic",
-      issue: lorem,
-      id:"7",
-      status: "pending",
-      due: "12/12/2012",
-      telephone: "123456789",
-    },
-  ]);
+  const [visible, setvisible] = useState(false);
+
+  const [activeCard, setactiveCard] = useState({
+    hosp_name: "Mayur",
+    issue: lorem,
+    due: "12/12/2012",
+    avatar: "https://image.flaticon.com/icons/png/512/3135/3135768.png",
+  });
+
+  // const [appointments, setappointments] = useState([
+  //   {
+  //     name: "Mayur",
+  //     issue: lorem,
+  //     due: "12/12/2012",
+  //     avatar: "https://image.flaticon.com/icons/png/512/3135/3135768.png",
+  //   },
+  //   {
+  //     name: "Siddhesh",
+  //     issue: lorem,
+  //     due: "12/12/2012",
+  //     avatar: "https://image.flaticon.com/icons/png/512/3135/3135768.png",
+  //   },
+  //   {
+  //     name: "Om",
+  //     issue: lorem,
+  //     due: "12/12/2012",
+  //     avatar: "https://image.flaticon.com/icons/png/512/3135/3135768.png",
+  //   },
+  //   {
+  //     name: "Amey",
+  //     issue: lorem,
+  //     due: "12/12/2012",
+  //     avatar: "https://image.flaticon.com/icons/png/512/3135/3135768.png",
+  //   },
+  //   {
+  //     name: "Shardul",
+  //     issue: lorem,
+  //     due: "12/12/2012",
+  //     avatar: "https://image.flaticon.com/icons/png/512/3135/3135768.png",
+  //   },
+  // ]);
+
+  const dispatch = useDispatch();
+  const appointments = useSelector((state) => state.appointments);
+
+  useEffect(() => {
+    dispatch(fetchAppointments("iZUjekN5AXhD1DHbV6c2"));
+  }, []);
 
   return appointments.filter((appointment) => appointment.status === status);
-};
-
+}
 
 //Pending Appointments
 export function PendingAppointments(props) {
@@ -81,7 +79,7 @@ export function PendingAppointments(props) {
     <ScrollView showsVerticalScrollIndicator={false}>
       <Layout style={styles.container} {...props}>
         {appointments.map((appointment) => (
-          <MyCard key={appointment.id} appointment={appointment}/>
+          <MyCard key={appointment.id} appointment={appointment} />
         ))}
       </Layout>
     </ScrollView>
@@ -96,7 +94,7 @@ export function CompletedAppointments(props) {
     <ScrollView showsVerticalScrollIndicator={false}>
       <Layout style={styles.container} {...props}>
         {appointments.map((appointment) => (
-          <MyCard key={appointment.id} appointment={appointment}/>
+          <MyCard key={appointment.id} appointment={appointment} />
         ))}
       </Layout>
     </ScrollView>

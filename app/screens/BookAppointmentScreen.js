@@ -1,5 +1,6 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
+import moment from "moment";
 import {
   Button,
   Input,
@@ -17,6 +18,8 @@ import { ScrollView } from "react-native-gesture-handler";
 import Form from "../components/forms/Form";
 import FormField from "../components/forms/FormField";
 import SubmitForm from "../components/forms/SubmitForm";
+import { firestore } from "../auth/firebase";
+import { APPOINTMENT_STATUS, COLLECTION } from "../redux/constants";
 
 const validationSchema = Yup.object().shape({
   FirstName: Yup.string().required("Please Enter your First Name.").label(),
@@ -37,9 +40,39 @@ const validationSchema = Yup.object().shape({
 });
 
 function BookAppointmentScreen({ navigation }) {
-  const handleSubmit = (values) => {
-    console.log("registered");
-    navigation.navigate("PatientDashboard");
+  const handleSubmit = async (values) => {
+    console.log({
+      ...values,
+      date: new Date().getDate(),
+      createdAt: moment(),
+      gender: Gender[selectedIndex],
+    });
+
+    const appointmentDetails = {
+      patientDetails: {
+        firstName: values.FirstName,
+        lastName: values.LastName,
+        age: values.Age,
+        contactNo: values.ContactNo,
+        gender: Gender[selectedIndex],
+        symptoms: values.Symptoms,
+        patientId: "GOI9JHTwpo0QmkFWSuxO",
+      },
+      createdAt: Date.now(),
+      appointmentDate: moment(date).format("DD/MM/YYYY"),
+      hospitalId: "iZUjekN5AXhD1DHbV6c2",
+      status: APPOINTMENT_STATUS.PENDING,
+    };
+
+    try {
+      await firestore
+        .collection(COLLECTION.APPOINTMENT)
+        .add(appointmentDetails);
+    } catch (error) {
+      console.log(error.message);
+    }
+
+    // navigation.navigate("PatientDashboard");
   };
 
   const [selectedIndex, setSelectedIndex] = React.useState(0);
@@ -66,7 +99,7 @@ function BookAppointmentScreen({ navigation }) {
             Symptoms: "",
             AppointmentDate: date.toLocaleDateString(),
           }}
-          onSubmit={(values) => handleSubmit(values)}
+          onSubmit={handleSubmit}
           validationSchema={validationSchema}
         >
           <FormField
@@ -113,6 +146,7 @@ function BookAppointmentScreen({ navigation }) {
           <FormField
             multiline={true}
             label="Symptoms"
+            name="Symptoms"
             placeholder="Enter Symptoms you are having"
           />
 

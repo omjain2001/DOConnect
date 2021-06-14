@@ -24,8 +24,7 @@ export default () => (
 
     <ApplicationProvider {...eva} theme={{ ...eva.light, ...theme }}>
       <Provider store={store}>
-        <PatientNav />
-        {/* <CustomSpinner visible={true} /> */}
+        <Navigation />
       </Provider>
     </ApplicationProvider>
   </>

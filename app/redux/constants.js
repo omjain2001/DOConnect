@@ -13,6 +13,7 @@ export const SET_CAN_LOAD_MORE = "SET_CAN_LOAD_MORE";
 export const SET_IS_MORE_LOADING = "SET_IS_MORE_LOADING";
 export const SET_APPOINTMENTS = "SET_APPOINTMENTS";
 export const SET_PATIENTS_IN_QUEUE = "SET_PATIENTS_IN_QUEUE";
+export const SET_APPOINTMENT_STATUS = "SET_APPOINTMENT_STATUS";
 
 // Collections
 export const COLLECTION = {
@@ -27,4 +28,12 @@ export const COLLECTION = {
 export const USER_TYPE = {
   PATIENT: "patient",
   DOCTOR: "doctor",
+};
+
+// Appointment Status
+export const APPOINTMENT_STATUS = {
+  COMPLETED: "completed",
+  PENDING: "pending",
+  REJECTED: "rejected",
+  CANCELLED: "cancelled",
 };

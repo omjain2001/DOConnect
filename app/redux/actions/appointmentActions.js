@@ -1,18 +1,19 @@
 import {
   COLLECTION,
   SET_APPOINTMENTS,
+  SET_APPOINTMENT_STATUS,
   SET_PATIENTS_IN_QUEUE,
   USER_TYPE,
 } from "../constants";
 import { firestore } from "../../auth/firebase";
 
-export const fetchAppointments = (id) => async (dispatch, getState) => {
-  const userType = getState().auth.userType;
+export const fetchAppointments = (id, type) => async (dispatch, getState) => {
+  const userType = type ? type : getState().auth.userType;
   try {
     if (userType === USER_TYPE.PATIENT) {
       const appointments = await firestore
         .collection(COLLECTION.APPOINTMENT)
-        .where("patient_details.id", "==", id)
+        .where("patientDetails.patientId", "==", id)
         .get();
       if (!appointments.empty) {
         let arr = [];
@@ -88,6 +89,28 @@ export const cancelAppointment =
         payload: getState().appointments.data.filter(
           (doc) => doc.id !== appointmentId
         ),
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+export const updateAppointmentStatus =
+  (status, appointmentId) => async (dispatch) => {
+    try {
+      await firestore
+        .collection(COLLECTION.APPOINTMENT)
+        .doc(appointmentId)
+        .update({
+          status,
+        });
+
+      dispatch({
+        type: SET_APPOINTMENT_STATUS,
+        payload: {
+          appointmentId,
+          status,
+        },
       });
     } catch (error) {
       console.log(error.message);

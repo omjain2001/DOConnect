@@ -1,15 +1,14 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import {PatientProfileNav,BookAppointmentNav,AppointmentHistoryNav} from '../navigations/PatientProfileNav';
 import {
-  BottomNavigation,
-  BottomNavigationTab,
-} from "@ui-kitten/components";
+  PatientProfileNav,
+  BookAppointmentNav,
+  AppointmentHistoryNav,
+} from "../navigations/PatientProfileNav";
+import { BottomNavigation, BottomNavigationTab } from "@ui-kitten/components";
 
 const { Navigator, Screen } = createBottomTabNavigator();
-
-
 
 const BottomTabBar = ({ navigation, state }) => (
   <BottomNavigation
@@ -23,18 +22,11 @@ const BottomTabBar = ({ navigation, state }) => (
 );
 
 const TabNavigator = () => (
-  <Navigator tabBar={(props) => <BottomTabBar {...props} /> }>
+  <Navigator tabBar={(props) => <BottomTabBar {...props} />}>
     <Screen name="Book" component={BookAppointmentNav} />
     <Screen name="Dashboard" component={PatientProfileNav} />
     <Screen name="Appointments" component={AppointmentHistoryNav} />
   </Navigator>
 );
 
-
-
-export const PatientNav = () => (
-  <NavigationContainer>
-    <TabNavigator />
-  </NavigationContainer>
- 
-);
+export const PatientNav = () => <TabNavigator />;

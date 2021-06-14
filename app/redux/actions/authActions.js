@@ -50,7 +50,10 @@ export const fetchUser = (email, userType) => async (dispatch) => {
         res({
           status: "success",
           message: "Data fetched successfully",
-          data: getUser.docs[0].data(),
+          data: {
+            ...userData,
+            id: getUser.docs[0].id,
+          },
         });
       });
     } else {
