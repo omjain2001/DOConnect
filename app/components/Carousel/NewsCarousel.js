@@ -3,6 +3,7 @@ import { View,  Image, Linking } from "react-native";
 import { create } from "apisauce";
 import { Text } from "@ui-kitten/components";
 import Carousel from "react-native-snap-carousel";
+import { Dimensions } from 'react-native';
 
 function NewsCarousel() {
   const [Articles, setArticles] = useState([
@@ -12,7 +13,10 @@ function NewsCarousel() {
       title:"OOPs bad network",
     }
   ]);
+
   const [activeIndex, setActiveIndex] = useState(0);
+
+  const windowWidth = Dimensions.get('window').width;
 
   useEffect(() => {
     const api = create({ baseURL: "https://newsapi.org/v2" });
@@ -39,9 +43,8 @@ function NewsCarousel() {
     return (
       <View
         style={{
-          borderRadius: 5,
+          flex:1,
           backgroundColor:"#f2f2f2",
-          overflow: "hidden",
           justifyContent: "center",
           alignContent: "center",
           alignItems: "center",
@@ -50,7 +53,7 @@ function NewsCarousel() {
         }}
       >
         <Image
-          style={{ width: 300, flex: 4, flexDirection: "column" }}
+          style={{ width: "100%", flex: 4, flexDirection: "column" }}
           onPress={() => {
             Linking.openURL(item.url);
           }}
@@ -72,8 +75,8 @@ function NewsCarousel() {
         autoplayInterval={3000}
         ref={ref}
         data={Articles}
-        sliderWidth={300}
-        itemWidth={300}
+        sliderWidth={windowWidth}
+        itemWidth={windowWidth}
         renderItem={renderItem}
         loop={true}
         onSnapToItem={(index) => setActiveIndex(index)}
