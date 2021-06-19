@@ -17,14 +17,13 @@ const Navigation = () => {
   }, []);
 
   const dispatch = useDispatch();
-  const [profileComplete, setProfileComplete] = useState(false);
+  const [profileComplete, setProfileComplete] = useState(null);
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
     const authUser = auth.onAuthStateChanged(async (user) => {
       try {
         if (user) {
-          setLoggedIn(true);
           dispatch({
             type: SET_USER_TYPE,
             payload: USER_TYPE.PATIENT,
@@ -34,6 +33,7 @@ const Navigation = () => {
             fetchUser(user.email, USER_TYPE.PATIENT)
           );
           if (getUser) {
+            setLoggedIn(true);
             setProfileComplete(getUser.data.isProfileSet);
           }
           dispatch(fetchAppointments(getUser.data.id, USER_TYPE.PATIENT));
@@ -48,11 +48,17 @@ const Navigation = () => {
     return () => authUser();
   }, []);
 
+  // const userType = auth.currentUser?.displayName;
+
   return (
     <NavigationContainer>
       {loggedIn ? (
-        profileComplete ? (
-          <PatientNav />
+        profileComplete !== null && profileComplete ? (
+          "patient" === USER_TYPE.PATIENT ? (
+            <PatientNav />
+          ) : (
+            console.log("Need to place Doctor Dashboard")
+          )
         ) : (
           <CompleteProfileNavigator />
         )

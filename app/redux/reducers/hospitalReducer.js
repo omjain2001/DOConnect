@@ -3,12 +3,14 @@ import {
   SET_HOSPITALS,
   SET_CAN_LOAD_MORE,
   SET_IS_MORE_LOADING,
+  SET_CURRENT_HOSPITAL,
 } from "../constants";
 
 const initialState = {
   data: [],
+  currentHospital: null,
   lastVisibleHospital: null,
-  canLoadMore: true,
+  canLoadMore: false,
   isMoreLoading: false,
 };
 
@@ -29,6 +31,20 @@ export const hospitalReducer = (state = initialState, action) => {
       };
     }
 
+    case SET_CURRENT_HOSPITAL: {
+      // console.log(
+      //   {
+      //     ...state,
+      //     currentHospital: action.payload,
+      //   },
+      //   "STATE"
+      // );
+      return {
+        ...state,
+        currentHospital: action.payload,
+      };
+    }
+
     case SET_CAN_LOAD_MORE: {
       return {
         ...state,
@@ -44,7 +60,7 @@ export const hospitalReducer = (state = initialState, action) => {
     }
 
     default: {
-      return initialState;
+      return state;
     }
   }
 };

@@ -187,7 +187,7 @@ export const deleteUser = () => async (dispatch, getState) => {
       await firestore.collection(COLLECTION.DOCTOR).doc(userId).delete();
       await firestore
         .collection(COLLECTION.HOSPITAL)
-        .doc(`${getState().auth.user.hospital.id}.doctorsRef`)
+        .doc(getState().auth.user.hospital.id)
         .update({
           doctorsRef: firebase.firestore.FieldValue.arrayRemove(userId),
         });

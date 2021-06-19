@@ -1,12 +1,16 @@
 import {
+  ADD_APPOINTMENTS,
   SET_APPOINTMENTS,
   SET_APPOINTMENT_STATUS,
   SET_PATIENTS_IN_QUEUE,
+  SET_TODAYS_APPOINTMENTS,
 } from "../constants";
 
 const initialState = {
   data: [],
-  patientsInQueue: 0,
+  queue: 0,
+  examined: 0,
+  total: 0,
 };
 
 export const appointmentReducer = (state = initialState, action) => {
@@ -18,10 +22,25 @@ export const appointmentReducer = (state = initialState, action) => {
       };
     }
 
+    case ADD_APPOINTMENTS: {
+      return {
+        ...state,
+        data: [action.payload, ...state.data],
+      };
+    }
+
     case SET_PATIENTS_IN_QUEUE: {
       return {
         ...state,
-        patientsInQueue: action.payload,
+        queue: action.payload,
+        examined: state.total - action.payload,
+      };
+    }
+
+    case SET_TODAYS_APPOINTMENTS: {
+      return {
+        ...state,
+        total: action.payload,
       };
     }
 

@@ -2,6 +2,7 @@ import { firestore } from "../../auth/firebase";
 import {
   ADD_HOSPITALS,
   COLLECTION,
+  FETCH_MORE_DATA_LIMIT,
   SET_CAN_LOAD_MORE,
   SET_HOSPITALS,
   SET_IS_MORE_LOADING,
@@ -12,20 +13,8 @@ export const fetchInitialHospitals = () => async (dispatch) => {
     const res = await firestore
       .collection(COLLECTION.HOSPITAL)
       .orderBy("hospitalName", "asc")
-      .limit(7)
+      .limit(FETCH_MORE_DATA_LIMIT)
       .get();
-
-    if (res.empty || res.docs.length < 7) {
-      dispatch({
-        type: SET_CAN_LOAD_MORE,
-        payload: false,
-      });
-    } else {
-      dispatch({
-        type: SET_CAN_LOAD_MORE,
-        payload: true,
-      });
-    }
 
     if (!res.empty) {
       let arr = [];
@@ -38,6 +27,18 @@ export const fetchInitialHospitals = () => async (dispatch) => {
         },
       });
     }
+
+    if (res.empty || res.docs.length < FETCH_MORE_DATA_LIMIT) {
+      dispatch({
+        type: SET_CAN_LOAD_MORE,
+        payload: false,
+      });
+    } else {
+      dispatch({
+        type: SET_CAN_LOAD_MORE,
+        payload: true,
+      });
+    }
   } catch (error) {
     console.log(error.message);
   }
@@ -45,8 +46,8 @@ export const fetchInitialHospitals = () => async (dispatch) => {
 
 export const fetchMoreHospitals = () => async (dispatch, getState) => {
   try {
-    const lastVisible = getState().hospitals.lastVisibleHospital;
-    if (lastVisible) {
+    const hospitals = getState().hospitals;
+    if (hospitals.lastVisibleHospital && hospitals.canLoadMore) {
       dispatch({
         type: SET_IS_MORE_LOADING,
         payload: true,
@@ -55,16 +56,10 @@ export const fetchMoreHospitals = () => async (dispatch, getState) => {
       const getMore = await firestore
         .collection(COLLECTION.HOSPITAL)
         .orderBy("hospitalName", "asc")
-        .startAfter(lastVisible)
-        .limit(7)
+        .startAfter(hospitals.lastVisibleHospital)
+        .limit(FETCH_MORE_DATA_LIMIT)
         .get();
 
-      if (getMore.empty || getMore.docs.length < 7) {
-        dispatch({
-          type: SET_CAN_LOAD_MORE,
-          payload: false,
-        });
-      }
       if (!getMore.empty) {
         let arr = [];
         getMore.docs.forEach((doc) => arr.push(doc.data()));
@@ -74,6 +69,13 @@ export const fetchMoreHospitals = () => async (dispatch, getState) => {
             data: arr,
             lastVisibleHospital: getMore.docs[getMore.docs.length - 1],
           },
+        });
+      }
+
+      if (getMore.empty || getMore.docs.length < FETCH_MORE_DATA_LIMIT) {
+        dispatch({
+          type: SET_CAN_LOAD_MORE,
+          payload: false,
         });
       }
 

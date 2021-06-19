@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import moment from "moment";
 import {
@@ -18,8 +18,14 @@ import { ScrollView } from "react-native-gesture-handler";
 import Form from "../components/forms/Form";
 import FormField from "../components/forms/FormField";
 import SubmitForm from "../components/forms/SubmitForm";
-import { firestore } from "../auth/firebase";
-import { APPOINTMENT_STATUS, COLLECTION } from "../redux/constants";
+import { auth, firestore } from "../auth/firebase";
+import {
+  ADD_APPOINTMENTS,
+  APPOINTMENT_STATUS,
+  COLLECTION,
+  SET_APPOINTMENTS,
+} from "../redux/constants";
+import { useDispatch, useSelector } from "react-redux";
 
 const validationSchema = Yup.object().shape({
   FirstName: Yup.string().required("Please Enter your First Name.").label(),
@@ -40,14 +46,14 @@ const validationSchema = Yup.object().shape({
 });
 
 function BookAppointmentScreen({ navigation }) {
-  const handleSubmit = async (values) => {
-    console.log({
-      ...values,
-      date: new Date().getDate(),
-      createdAt: moment(),
-      gender: Gender[selectedIndex],
-    });
+  const currentHospital = useSelector(
+    (state) => state.hospitals.currentHospital
+  );
+  const user = useSelector((state) => state.auth.user);
 
+  const dispatch = useDispatch();
+
+  const handleSubmit = async (values) => {
     const appointmentDetails = {
       patientDetails: {
         firstName: values.FirstName,
@@ -56,11 +62,19 @@ function BookAppointmentScreen({ navigation }) {
         contactNo: values.ContactNo,
         gender: Gender[selectedIndex],
         symptoms: values.Symptoms,
-        patientId: "GOI9JHTwpo0QmkFWSuxO",
+        id: user.id,
       },
       createdAt: Date.now(),
       appointmentDate: moment(date).format("DD/MM/YYYY"),
-      hospitalId: "iZUjekN5AXhD1DHbV6c2",
+      // hospitalId: "iZUjekN5AXhD1DHbV6c2",
+      hospital: {
+        // id: "iZUjekN5AXhD1DHbV6c2",
+        UID: currentHospital.UID,
+        hospitalName: currentHospital.hospitalName,
+        address: currentHospital.address,
+        telephone: currentHospital.telephone,
+        phone: currentHospital.phone,
+      },
       status: APPOINTMENT_STATUS.PENDING,
     };
 
@@ -68,6 +82,11 @@ function BookAppointmentScreen({ navigation }) {
       await firestore
         .collection(COLLECTION.APPOINTMENT)
         .add(appointmentDetails);
+
+      dispatch({
+        type: ADD_APPOINTMENTS,
+        payload: appointmentDetails,
+      });
     } catch (error) {
       console.log(error.message);
     }
@@ -86,9 +105,9 @@ function BookAppointmentScreen({ navigation }) {
   return (
     <ScrollView>
       <Layout style={styles.container}>
-        <Text category="h3" style={{ textAlign: "center" }}>
+        {/* <Text category="h3" style={{ textAlign: "center" }}>
           Book Appointment
-        </Text>
+        </Text> */}
         <Form
           initialValues={{
             FirstName: "",
