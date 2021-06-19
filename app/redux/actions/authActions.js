@@ -1,3 +1,4 @@
+import firebase from "firebase";
 import { auth, firestore, storage } from "../../auth/firebase";
 import {
   SET_USER,
@@ -49,7 +50,10 @@ export const fetchUser = (email, userType) => async (dispatch) => {
         res({
           status: "success",
           message: "Data fetched successfully",
-          data: getUser.docs[0].data(),
+          data: {
+            ...userData,
+            id: getUser.docs[0].id,
+          },
         });
       });
     } else {
@@ -170,4 +174,25 @@ export const resetUser = () => (dispatch) => {
     type: RESET_USER,
     payload: null,
   });
+};
+
+export const deleteUser = () => async (dispatch, getState) => {
+  const userId = getState().auth.user.id;
+  try {
+    auth.currentUser.delete();
+
+    if (getState().auth.userType === USER_TYPE.PATIENT) {
+      await firestore.collection(COLLECTION.PATIENT).doc(userId).delete();
+    } else {
+      await firestore.collection(COLLECTION.DOCTOR).doc(userId).delete();
+      await firestore
+        .collection(COLLECTION.HOSPITAL)
+        .doc(getState().auth.user.hospital.id)
+        .update({
+          doctorsRef: firebase.firestore.FieldValue.arrayRemove(userId),
+        });
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
 };

@@ -18,6 +18,7 @@ import { USER_TYPE } from "../redux/constants";
 import { useDispatch } from "react-redux";
 import { fetchUser, setUserType } from "../redux/actions/authActions";
 import { CustomSpinner } from "./CustomSpinner";
+import { fetchAppointments } from "../redux/actions/appointmentActions";
 
 const AlertIcon = (props) => <Icon {...props} name="alert-circle-outline" />;
 
@@ -56,8 +57,8 @@ function LoginScreen({ navigation }) {
       const user = await Login(values.email, values.password);
       if (user.user) {
         dispatch(setUserType(type));
-
         const res = await dispatch(fetchUser(values.email, type));
+        dispatch(fetchAppointments(res.data.id));
         setIsLoading(false);
 
         if (!res.data.isProfileSet) {

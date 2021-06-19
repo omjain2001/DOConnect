@@ -23,7 +23,7 @@ const QualificationScreen = ({ navigation, route }) => {
 
   const auth = useSelector((state) => state.auth);
 
-  const handleSubmit = (values) => {
+  const handleSubmit = async (values) => {
     setIsLoading(true);
     const { profile } = route.params;
     let profileImgUrl = null;
@@ -41,7 +41,7 @@ const QualificationScreen = ({ navigation, route }) => {
             .split(".")
             .pop()}`
         );
-        const imageBlob = await(await fetch(profile.profileImg)).blob();
+        const imageBlob = await (await fetch(profile.profileImg)).blob();
         await imageRef.put(imageBlob);
         profileImgUrl = await imageRef.getDownloadURL();
       } catch (error) {
@@ -98,7 +98,7 @@ const QualificationScreen = ({ navigation, route }) => {
               label="Years of Experience"
               placeholder="Years"
               keyboardType="number-pad"
-              name="experienceYears"
+              name="yearsOfExp"
             />
             <FormField
               label="Bio"

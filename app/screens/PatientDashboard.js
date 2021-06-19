@@ -1,79 +1,124 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { Button, Icon, Input, Layout, Text } from "@ui-kitten/components";
+import {
+  Button,
+  Divider,
+  Icon,
+  Layout,
+  Text,
+  useTheme,
+} from "@ui-kitten/components";
 import { ScrollView } from "react-native-gesture-handler";
+import { useEffect } from "react";
+import NewsCarousel from "../components/Carousel/NewsCarousel";
+import { useSelector } from "react-redux";
+import MyCard from "../components/MyCard";
 
 function PatientDashboard(props) {
   const SearchIcon = (props) => {
     return <Icon {...props} name="search" />;
   };
 
+  const theme = useTheme();
+
+  // useEffect(() => {
+  //   return () => {};
+  // }, []);
+
+  const appointments = useSelector((state) => state.appointments.data);
+
+  const recentAppointments = appointments?.slice(0, 5);
+
   return (
-    <ScrollView {...props}>
-      <View style={styles.container} {...props}>
-        <Text style={styles.heading} category="h3" {...props}>
+    <Layout style={styles.container} {...props}>
+      <ScrollView {...props}>
+        <Text style={styles.heading} category="h4" {...props}>
           Dashboard
         </Text>
-        <Input placeholder="Search" accessoryLeft={SearchIcon} />
-        <Layout style={styles.carousel} level="4">
-          <Text style={{ width: "100%", textAlign: "center" }}>Carousel</Text>
-        </Layout>
-        <Button style={styles.btn}>
-          <Text>Book Appointment</Text>
+        <Divider
+          style={{
+            width: "50%",
+            alignSelf: "center",
+            height: 1.2,
+            backgroundColor: theme["color-primary-500"],
+          }}
+        />
+        <Button
+          style={{
+            textAlign: "left",
+            width: "90%",
+            alignContent: "flex-start",
+            justifyContent: "flex-start",
+            alignSelf: "center",
+            marginVertical: 30,
+          }}
+          size="small"
+          accessoryLeft={SearchIcon}
+          appearance="outline"
+          onPress={() => props.navigation.navigate("Search")}
+        >
+          <Text>Search</Text>
         </Button>
-        <Button style={[styles.btn,{marginBottom:20}]}>
+        <View style={styles.carousel}>
+          <NewsCarousel />
+        </View>
+        <Button
+          style={styles.btn}
+          onPress={() => props.navigation.navigate("Search")}
+        >
+          Book Appointment
+        </Button>
+        {/* <Button
+          style={styles.btn}
+          onPress={() => props.navigation.navigate("Appointments")}
+        >
           <Text>View Appointment History</Text>
         </Button>
-        <Layout style={[styles.feedBack, { paddingTop: 20 }]} level="1">
-          <Input
-            multiline={true}
-            textStyle={[styles.feedbackInput, { minHeight: 100 }]}
-            placeholder={"Feedback..."}
-          ></Input>
-          <Button style={[styles.btn]}>
-            <Text>Submit</Text>
-          </Button>
+        <Button
+          style={styles.btn}
+          onPress={() => props.navigation.navigate("Profile")}
+        >
+          <Text>View Profile</Text>
+        </Button> */}
+        <Layout style={{ paddingHorizontal: 10, marginVertical: 30 }}>
+          <Text category="h6" style={{ fontWeight: "bold", marginBottom: 10 }}>
+            Recent Appointments
+          </Text>
+          {recentAppointments?.map((app, index) => (
+            <MyCard appointment={app} key={index} />
+          ))}
         </Layout>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </Layout>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 30,
-    marginHorizontal: 20,
+    paddingVertical: 10,
     alignContent: "center",
     justifyContent: "center",
+    flex: 1,
   },
   heading: {
     marginVertical: 10,
     textAlign: "center",
   },
   carousel: {
+    flex: 1,
     width: "100%",
-    alignContent: "center",
     justifyContent: "center",
-    textAlign: "center",
-    height: 200,
-    marginVertical: 10,
-  },
-  feedBack: {
-    width: "100%",
-    borderTopColor: "black",
-    borderTopWidth: 2,
-    height: 200,
-    justifyContent: "space-evenly",
+    alignContent: "center",
     alignItems: "center",
-  },
-  feedbackInput: {
+    textAlign: "center",
+    marginVertical: 10,
     width: "100%",
-    maxHeight: 100,
-    height: 50,
+    paddingHorizontal: 0,
   },
   btn: {
+    flex: 1,
+    width: "90%",
     alignSelf: "center",
-    width: "100%",
     fontSize: 50,
     marginVertical: 10,
   },
