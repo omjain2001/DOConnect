@@ -173,7 +173,7 @@ export const resetUser = () => (dispatch) => {
   });
 };
 
-export const deleteUser = () => (dispatch, getState) => {
+export const deleteUser = () => async(dispatch, getState) => {
   const userId = getState().auth.user.id;
   try {
     auth.currentUser.delete();

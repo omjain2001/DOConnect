@@ -16,6 +16,9 @@ import ViewHospitalDetails from './app/screens/ViewHospitalDetails'
 import DoctorDashboard from "./app/screens/DoctorDashboard";
 import BookAppointmentScreen from "./app/screens/BookAppointmentScreen";
 import AppoinmentDetails from "./app/screens/profile/AppoinmentDetails";
+import PatientNav from './app/navigations/PatientNav';
+import ForgotPassword from './app/screens/ForgotPassword'
+import ChangePassword from './app/screens/ChangePassword'
 
 export default () => (
   <>
@@ -26,9 +29,12 @@ export default () => (
         {/* <PatientDashboard /> */}
         {/* <Navigation /> */}
         {/* <ViewHospitalDetails/> */}
-        {/* <DoctorDashboard/>  */}
+        {/* <PatientNav/> */}
+        <DoctorDashboard/> 
         {/* <BookAppointmentScreen/> */}
-        <AppoinmentDetails/>
+        {/* <AppoinmentDetails/> */}
+        {/* <ForgotPassword/> */}
+        {/* <ChangePassword/> */}
       </Provider>
     </ApplicationProvider>
   </>
