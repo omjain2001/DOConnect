@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, StyleSheet, Image } from "react-native";
 import {
   Avatar,
@@ -12,8 +12,10 @@ import {
 } from "@ui-kitten/components";
 import { ScrollView } from "react-native-gesture-handler";
 import { useState } from "react";
-
-
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAppointments } from "../redux/actions/appointmentActions";
+import MyCard from "../components/MyCard";
+import { APPOINTMENT_STATUS } from "../redux/constants";
 
 function AppointmentHistory(props) {
   const lorem =
@@ -28,143 +30,88 @@ function AppointmentHistory(props) {
     avatar: "https://image.flaticon.com/icons/png/512/3135/3135768.png",
   });
 
-  const [appointments, setappointments] = useState([
-    {
-      name: "Mayur",
-      issue: lorem,
-      due: "12/12/2012",
-      avatar: "https://image.flaticon.com/icons/png/512/3135/3135768.png",
-    },
-    {
-      name: "Siddhesh",
-      issue: lorem,
-      due: "12/12/2012",
-      avatar: "https://image.flaticon.com/icons/png/512/3135/3135768.png",
-    },
-    {
-      name: "Om",
-      issue: lorem,
-      due: "12/12/2012",
-      avatar: "https://image.flaticon.com/icons/png/512/3135/3135768.png",
-    },
-    {
-      name: "Amey",
-      issue: lorem,
-      due: "12/12/2012",
-      avatar: "https://image.flaticon.com/icons/png/512/3135/3135768.png",
-    },
-    {
-      name: "Shardul",
-      issue: lorem,
-      due: "12/12/2012",
-      avatar: "https://image.flaticon.com/icons/png/512/3135/3135768.png",
-    },
-  ]);
+  // const [appointments, setappointments] = useState([
+  //   {
+  //     name: "Mayur",
+  //     issue: lorem,
+  //     due: "12/12/2012",
+  //     avatar: "https://image.flaticon.com/icons/png/512/3135/3135768.png",
+  //   },
+  //   {
+  //     name: "Siddhesh",
+  //     issue: lorem,
+  //     due: "12/12/2012",
+  //     avatar: "https://image.flaticon.com/icons/png/512/3135/3135768.png",
+  //   },
+  //   {
+  //     name: "Om",
+  //     issue: lorem,
+  //     due: "12/12/2012",
+  //     avatar: "https://image.flaticon.com/icons/png/512/3135/3135768.png",
+  //   },
+  //   {
+  //     name: "Amey",
+  //     issue: lorem,
+  //     due: "12/12/2012",
+  //     avatar: "https://image.flaticon.com/icons/png/512/3135/3135768.png",
+  //   },
+  //   {
+  //     name: "Shardul",
+  //     issue: lorem,
+  //     due: "12/12/2012",
+  //     avatar: "https://image.flaticon.com/icons/png/512/3135/3135768.png",
+  //   },
+  // ]);
+
+  const dispatch = useDispatch();
+  const appointments = useSelector((state) => state.appointments);
+
+  // useEffect(() => {
+  //   dispatch(fetchAppointments("iZUjekN5AXhD1DHbV6c2"));
+  // }, []);
+
+  return appointments.filter((appointment) => appointment.status === status);
+}
+
+//Pending Appointments
+export function PendingAppointments(props) {
+  // const appointments = useAppointmentStatus("pending");
+  const appointments = useSelector((state) => state.appointments);
+
+  console.log(appointments);
+
+  const pendingAppointments = appointments.data.filter(
+    (appointment) => appointment.status === APPOINTMENT_STATUS.PENDING
+  );
 
   return (
-    <ScrollView {...props}>
+    <ScrollView showsVerticalScrollIndicator={false}>
       <Layout style={styles.container} {...props}>
-        <Text style={{ top: 0, textAlign: "center" }} category="h3" {...props}>
-          Appointments
-        </Text>
-        {appointments.map((appointment, index) => (
-          <Card
-            key={index}
-            status={"primary"}
-            style={{
-              marginVertical: 10,
-              padding: 0,
-              height: 100,
-              width: 320,
-            }}
-            onPress={() => {
-              setvisible(true);
-              setactiveCard(appointment);
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-around",
-                alignItems: "center",
-                width: "100%",
-                height: "100%",
-              }}
-            >
-              <View
-                style={{
-                  justifyContent: "center",
-                  alignItems: "center",
-                  flex: 1,
-                }}
-              >
-                <Avatar source={{ uri: appointment.avatar }}></Avatar>
-              </View>
-              <View
-                style={{ alignItems: "flex-start", flex: 4, paddingLeft: 10 }}
-              >
-                <Text>{"Name: " + appointment.name}</Text>
-                <Text numberOfLines={2}>{"Issue: " + appointment.issue}</Text>
-                <Text>{"Due: " + appointment.due}</Text>
-              </View>
-            </View>
-          </Card>
-        ))}
-        <Modal
-          visible={visible}
-          backdropStyle={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-          onBackdropPress={() => setvisible(false)}
-        >
-          <Card
-            {...props}
-            style={{
-              width: 300,
-              height: "100%",
-              borderRadius: 10,
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <Image
-              style={{
-                width: 100,
-                height: 100,
-                borderRadius: 100,
-                alignSelf: "center",
-              }}
-              source={{ uri: activeCard.avatar }}
-            ></Image>
-            <Divider style={{ marginVertical: 10 }} />
-            <Text
-              style={{ textAlign: "center", fontSize: 20, fontWeight: "bold" }}
-            >
-              {"Name"}
-            </Text>
-            <Text style={{ textAlign: "center", fontSize: 20 }}>
-              {activeCard.name}
-            </Text>
-            <Divider style={{ marginVertical: 10 }} />
-            <Text
-              style={{ textAlign: "center", fontSize: 20, fontWeight: "bold" }}
-            >
-              {"Issue"}
-            </Text>
-            <Text numberOfLines={5} style={{ textAlign: "left", fontSize: 20 }}>
-              {activeCard.issue}
-            </Text>
-            <Divider style={{ marginVertical: 10 }} />
-            <Text
-              style={{ textAlign: "center", fontSize: 20, fontWeight: "bold" }}
-            >
-              {"Date"}
-            </Text>
-            <Text style={{ textAlign: "center", fontSize: 20 }}>
-              {activeCard.due}
-            </Text>
-            <Divider style={{ marginVertical: 10 }} />
-            <Button {...props} onPress={()=>setvisible(false)} >Close</Button>
-          </Card>
-        </Modal>
+        {pendingAppointments &&
+          pendingAppointments.map((appointment, index) => (
+            <MyCard key={index} appointment={appointment} />
+          ))}
+      </Layout>
+    </ScrollView>
+  );
+}
+
+//Completed Appointmenst
+export function CompletedAppointments(props) {
+  // const appointments = useAppointmentStatus("completed");
+  const appointments = useSelector((state) => state.appointments);
+
+  const completedAppointments = appointments.data.filter(
+    (appointment) => appointment.status === APPOINTMENT_STATUS.COMPLETED
+  );
+
+  return (
+    <ScrollView showsVerticalScrollIndicator={false}>
+      <Layout style={styles.container} {...props}>
+        {completedAppointments &&
+          completedAppointments.map((appointment, index) => (
+            <MyCard key={index} appointment={appointment} />
+          ))}
       </Layout>
     </ScrollView>
   );
@@ -176,7 +123,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignContent: "center",
     justifyContent: "center",
+    flex: 1,
   },
 });
-
-export default AppointmentHistory;

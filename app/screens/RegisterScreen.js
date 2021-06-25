@@ -42,7 +42,7 @@ function RegisterScreen({ navigation, route }) {
   const [isLoading, setIsLoading] = useState(false);
 
   // Redux state
-  const auth = useSelector((state) => state.auth);
+  const userAuth = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
   const handleRegister = async ({ email, pass1 }) => {
@@ -51,12 +51,16 @@ function RegisterScreen({ navigation, route }) {
       const user = await Register(email, pass1);
 
       if (user?.user) {
-        if (auth.userType == USER_TYPE.DOCTOR) {
+        if (userAuth.userType == USER_TYPE.DOCTOR) {
           const userData = {
             email,
             isProfileSet: false,
-            hospitalRef: `${auth.user.hospital?.id}`,
+            hospitalRef: `${userAuth.user.hospital?.id}`,
           };
+
+          auth.currentUser.updateProfile({
+            displayName: USER_TYPE.DOCTOR,
+          });
 
           const newUser = await firestore
             .collection(COLLECTION.DOCTOR)
@@ -65,7 +69,7 @@ function RegisterScreen({ navigation, route }) {
           // Adding new doctor to hospital
           await firestore
             .collection(COLLECTION.HOSPITAL)
-            .doc(auth.user?.hospital?.id)
+            .doc(userAuth.user?.hospital?.id)
             .update({
               doctorsRef: firebase.firestore.FieldValue.arrayUnion(
                 `${newUser.id}`
@@ -84,6 +88,10 @@ function RegisterScreen({ navigation, route }) {
             email,
             isProfileSet: false,
           };
+
+          auth.currentUser.updateProfile({
+            displayName: USER_TYPE.PATIENT,
+          });
 
           const newUser = await firestore
             .collection(COLLECTION.PATIENT)

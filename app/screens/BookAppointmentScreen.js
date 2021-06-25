@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, StyleSheet } from "react-native";
+import moment from "moment";
 import {
   Button,
   Input,
@@ -17,6 +18,14 @@ import { ScrollView } from "react-native-gesture-handler";
 import Form from "../components/forms/Form";
 import FormField from "../components/forms/FormField";
 import SubmitForm from "../components/forms/SubmitForm";
+import { auth, firestore } from "../auth/firebase";
+import {
+  ADD_APPOINTMENTS,
+  APPOINTMENT_STATUS,
+  COLLECTION,
+  SET_APPOINTMENTS,
+} from "../redux/constants";
+import { useDispatch, useSelector } from "react-redux";
 
 const validationSchema = Yup.object().shape({
   FirstName: Yup.string().required("Please Enter your First Name.").label(),
@@ -37,9 +46,52 @@ const validationSchema = Yup.object().shape({
 });
 
 function BookAppointmentScreen({ navigation }) {
-  const handleSubmit = (values) => {
-    console.log("registered");
-    navigation.navigate("PatientDashboard");
+  const currentHospital = useSelector(
+    (state) => state.hospitals.currentHospital
+  );
+  const user = useSelector((state) => state.auth.user);
+
+  const dispatch = useDispatch();
+
+  const handleSubmit = async (values) => {
+    const appointmentDetails = {
+      patientDetails: {
+        firstName: values.FirstName,
+        lastName: values.LastName,
+        age: values.Age,
+        contactNo: values.ContactNo,
+        gender: Gender[selectedIndex],
+        symptoms: values.Symptoms,
+        id: user.id,
+      },
+      createdAt: Date.now(),
+      appointmentDate: moment(date).format("DD/MM/YYYY"),
+      // hospitalId: "iZUjekN5AXhD1DHbV6c2",
+      hospital: {
+        // id: "iZUjekN5AXhD1DHbV6c2",
+        UID: currentHospital.UID,
+        hospitalName: currentHospital.hospitalName,
+        address: currentHospital.address,
+        telephone: currentHospital.telephone,
+        phone: currentHospital.phone,
+      },
+      status: APPOINTMENT_STATUS.PENDING,
+    };
+
+    try {
+      await firestore
+        .collection(COLLECTION.APPOINTMENT)
+        .add(appointmentDetails);
+
+      dispatch({
+        type: ADD_APPOINTMENTS,
+        payload: appointmentDetails,
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+
+    // navigation.navigate("PatientDashboard");
   };
 
   const [selectedIndex, setSelectedIndex] = React.useState(0);
@@ -53,9 +105,9 @@ function BookAppointmentScreen({ navigation }) {
   return (
     <ScrollView>
       <Layout style={styles.container}>
-        <Text category="h3" style={{ textAlign: "center" }}>
+        {/* <Text category="h3" style={{ textAlign: "center" }}>
           Book Appointment
-        </Text>
+        </Text> */}
         <Form
           initialValues={{
             FirstName: "",
@@ -66,7 +118,7 @@ function BookAppointmentScreen({ navigation }) {
             Symptoms: "",
             AppointmentDate: date.toLocaleDateString(),
           }}
-          onSubmit={(values) => handleSubmit(values)}
+          onSubmit={handleSubmit}
           validationSchema={validationSchema}
         >
           <FormField
@@ -113,6 +165,7 @@ function BookAppointmentScreen({ navigation }) {
           <FormField
             multiline={true}
             label="Symptoms"
+            name="Symptoms"
             placeholder="Enter Symptoms you are having"
           />
 

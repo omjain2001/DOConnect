@@ -50,7 +50,10 @@ export const fetchUser = (email, userType) => async (dispatch) => {
         res({
           status: "success",
           message: "Data fetched successfully",
-          data: getUser.docs[0].data(),
+          data: {
+            ...userData,
+            id: getUser.docs[0].id,
+          },
         });
       });
     } else {
@@ -173,7 +176,7 @@ export const resetUser = () => (dispatch) => {
   });
 };
 
-export const deleteUser = () => async(dispatch, getState) => {
+export const deleteUser = () => async (dispatch, getState) => {
   const userId = getState().auth.user.id;
   try {
     auth.currentUser.delete();
@@ -184,7 +187,7 @@ export const deleteUser = () => async(dispatch, getState) => {
       await firestore.collection(COLLECTION.DOCTOR).doc(userId).delete();
       await firestore
         .collection(COLLECTION.HOSPITAL)
-        .doc(`${getState().auth.user.hospital.id}.doctorsRef`)
+        .doc(getState().auth.user.hospital.id)
         .update({
           doctorsRef: firebase.firestore.FieldValue.arrayRemove(userId),
         });

@@ -1,18 +1,21 @@
 import {
   COLLECTION,
   SET_APPOINTMENTS,
+  SET_APPOINTMENT_STATUS,
   SET_PATIENTS_IN_QUEUE,
+  SET_TODAYS_APPOINTMENTS,
   USER_TYPE,
 } from "../constants";
 import { firestore } from "../../auth/firebase";
 
-export const fetchAppointments = (id) => async (dispatch, getState) => {
-  const userType = getState().auth.userType;
+export const fetchAppointments = (id, type) => async (dispatch, getState) => {
+  const userType = type ? type : getState().auth.userType;
   try {
     if (userType === USER_TYPE.PATIENT) {
       const appointments = await firestore
         .collection(COLLECTION.APPOINTMENT)
-        .where("patient_details.id", "==", id)
+        .where("patientDetails.id", "==", id)
+        .orderBy("appointmentDate", "desc")
         .get();
       if (!appointments.empty) {
         let arr = [];
@@ -31,6 +34,7 @@ export const fetchAppointments = (id) => async (dispatch, getState) => {
       const appointments = await firestore
         .collection(COLLECTION.APPOINTMENT)
         .where("hospitalId", "==", id)
+        .orderBy("appointmentDate", "desc")
         .get();
       if (!appointments.empty) {
         let arr = [];
@@ -57,24 +61,47 @@ export const fetchAppointments = (id) => async (dispatch, getState) => {
 // 1. Whenever patient clicks on the hospital details card, fetch patients in queue
 // 2. Whenever patient books an appointment, appointment details will contain updated queue no.
 // 3. Whenever doctor rejects or appointment is cancelled by the patient,
-export const fetchPatientsInQueue = (hospitalId, date) => async (dispatch) => {
-  try {
-    const count = await firestore
-      .collection(COLLECTION.APPOINTMENT)
-      .where("hospitalId", "==", hospitalId)
-      .where("status", "==", "pending")
-      .where("appointment_date", "==", date)
-      .get();
-    if (!count.empty) {
-      dispatch({
-        type: SET_PATIENTS_IN_QUEUE,
-        payload: count.docs.length,
-      });
+export const fetchPatientsInQueue =
+  (UID, date) => async (dispatch, getState) => {
+    try {
+      const count = await firestore
+        .collection(COLLECTION.APPOINTMENT)
+        .where("hospital.UID", "==", UID)
+        .where("status", "==", "pending")
+        .where("appointmentDate", "==", date)
+        .get();
+      if (!count.empty) {
+        dispatch({
+          type: SET_PATIENTS_IN_QUEUE,
+          payload: count.docs.length,
+        });
+      }
+    } catch (error) {
+      console.log(error.message);
     }
-  } catch (error) {
-    console.log(error.message);
-  }
-};
+  };
+
+export const fetchTodaysAppointments =
+  (UID, date) => async (dispatch, getState) => {
+    try {
+      const appointmentStats = await firestore
+        .collection(COLLECTION.APPOINTMENT)
+        .where("hospital.UID", "==", UID)
+        .where("appointmentDate", "==", date)
+        .get();
+
+      if (appointmentStats) {
+        dispatch({
+          type: SET_TODAYS_APPOINTMENTS,
+          payload: appointmentStats.docs.length,
+        });
+      } else {
+        console.log("Running");
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
 
 export const cancelAppointment =
   (appointmentId) => async (dispatch, getState) => {
@@ -88,6 +115,28 @@ export const cancelAppointment =
         payload: getState().appointments.data.filter(
           (doc) => doc.id !== appointmentId
         ),
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+export const updateAppointmentStatus =
+  (status, appointmentId) => async (dispatch) => {
+    try {
+      await firestore
+        .collection(COLLECTION.APPOINTMENT)
+        .doc(appointmentId)
+        .update({
+          status,
+        });
+
+      dispatch({
+        type: SET_APPOINTMENT_STATUS,
+        payload: {
+          appointmentId,
+          status,
+        },
       });
     } catch (error) {
       console.log(error.message);

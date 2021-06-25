@@ -98,7 +98,7 @@ const QualificationScreen = ({ navigation, route }) => {
               label="Years of Experience"
               placeholder="Years"
               keyboardType="number-pad"
-              name="experienceYears"
+              name="yearsOfExp"
             />
             <FormField
               label="Bio"

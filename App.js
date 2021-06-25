@@ -35,6 +35,7 @@ export default () => (
         {/* <AppoinmentDetails/> */}
         {/* <ForgotPassword/> */}
         {/* <ChangePassword/> */}
+        {/* <Navigation /> */}
       </Provider>
     </ApplicationProvider>
   </>

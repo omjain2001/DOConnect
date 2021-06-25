@@ -1,48 +1,74 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { Button, Icon, Layout, Text } from "@ui-kitten/components";
+import {
+  Button,
+  Divider,
+  Icon,
+  Layout,
+  Text,
+  useTheme,
+} from "@ui-kitten/components";
 import { ScrollView } from "react-native-gesture-handler";
 import { useEffect } from "react";
 import NewsCarousel from "../components/Carousel/NewsCarousel";
+import { useSelector } from "react-redux";
+import MyCard from "../components/MyCard";
 
 function PatientDashboard(props) {
   const SearchIcon = (props) => {
     return <Icon {...props} name="search" />;
   };
 
-  useEffect(() => {
-    return () => {};
-  }, []);
+  const theme = useTheme();
+
+  // useEffect(() => {
+  //   return () => {};
+  // }, []);
+
+  const appointments = useSelector((state) => state.appointments.data);
+
+  const recentAppointments = appointments?.slice(0, 5);
 
   return (
-      <Layout style={styles.container} {...props}>
-    <ScrollView {...props}>
+    <Layout style={styles.container} {...props}>
+      <ScrollView {...props}>
+        <Text style={styles.heading} category="h4" {...props}>
+          Dashboard
+        </Text>
+        <Divider
+          style={{
+            width: "50%",
+            alignSelf: "center",
+            height: 1.2,
+            backgroundColor: theme["color-primary-500"],
+          }}
+        />
         <Button
           style={{
             textAlign: "left",
+            width: "90%",
             alignContent: "flex-start",
             justifyContent: "flex-start",
+            alignSelf: "center",
+            marginVertical: 30,
           }}
           size="small"
           accessoryLeft={SearchIcon}
           appearance="outline"
-          onPress={()=>props.navigation.navigate("Search")}
+          onPress={() => props.navigation.navigate("Search")}
         >
           <Text>Search</Text>
         </Button>
-        <Text style={styles.heading} category="h3" {...props}>
-          Dashboard
-        </Text>
         <View style={styles.carousel}>
           <NewsCarousel />
         </View>
         <Button
           style={styles.btn}
-          onPress={() => props.navigation.navigate("Book")}
+          onPress={() => props.navigation.navigate("Search")}
         >
-          <Text>Book Appointment</Text>
+          Book Appointment
         </Button>
-        <Button
+        {/* <Button
           style={styles.btn}
           onPress={() => props.navigation.navigate("Appointments")}
         >
@@ -53,19 +79,26 @@ function PatientDashboard(props) {
           onPress={() => props.navigation.navigate("Profile")}
         >
           <Text>View Profile</Text>
-        </Button>
-    </ScrollView>
-      </Layout>
+        </Button> */}
+        <Layout style={{ paddingHorizontal: 10, marginVertical: 30 }}>
+          <Text category="h6" style={{ fontWeight: "bold", marginBottom: 10 }}>
+            Recent Appointments
+          </Text>
+          {recentAppointments?.map((app, index) => (
+            <MyCard appointment={app} key={index} />
+          ))}
+        </Layout>
+      </ScrollView>
+    </Layout>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     paddingVertical: 10,
-    paddingHorizontal: 20,
     alignContent: "center",
     justifyContent: "center",
-    flex:1,
+    flex: 1,
   },
   heading: {
     marginVertical: 10,
@@ -73,29 +106,19 @@ const styles = StyleSheet.create({
   },
   carousel: {
     flex: 1,
+    width: "100%",
     justifyContent: "center",
     alignContent: "center",
     alignItems: "center",
     textAlign: "center",
     marginVertical: 10,
-  },
-  feedBack: {
-    width: 320,
-    borderTopColor: "black",
-    borderTopWidth: 2,
-    height: 200,
-    justifyContent: "center",
-    alignContent: "center",
-    alignItems: "center",
-  },
-  feedbackInput: {
-    width: 320,
-    maxHeight: 100,
-    height: 50,
+    width: "100%",
+    paddingHorizontal: 0,
   },
   btn: {
+    flex: 1,
+    width: "90%",
     alignSelf: "center",
-    width: 320,
     fontSize: 50,
     marginVertical: 10,
   },
