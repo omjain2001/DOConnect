@@ -19,6 +19,9 @@ import AppoinmentDetails from "./app/screens/profile/AppoinmentDetails";
 import PatientNav from './app/navigations/PatientNav';
 import ForgotPassword from './app/screens/ForgotPassword'
 import ChangePassword from './app/screens/ChangePassword'
+import DoctorNavigation from './app/navigations/DoctorNavigation'
+import {CompletedAppointments,PendingAppointments} from './app/screens/AppointmentHistory'
+import {AppoinmentNav} from './app/navigations/AppoinmnetsNav'
 
 export default () => (
   <>
@@ -30,12 +33,15 @@ export default () => (
         {/* <Navigation /> */}
         {/* <ViewHospitalDetails/> */}
         {/* <PatientNav/> */}
-        <DoctorDashboard/> 
+        {/* <DoctorDashboard/>  */}
         {/* <BookAppointmentScreen/> */}
         {/* <AppoinmentDetails/> */}
         {/* <ForgotPassword/> */}
         {/* <ChangePassword/> */}
         {/* <Navigation /> */}
+        <DoctorNavigation  />
+        {/* <PendingAppointments/> */}
+        {/* <AppoinmentNav/> */}
       </Provider>
     </ApplicationProvider>
   </>
